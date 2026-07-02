@@ -107,7 +107,7 @@ export default function VotePage() {
                     </span>
                   </div>
                   <div
-                    className="h-2.5 rounded-full overflow-hidden"
+                    className="h-4 rounded-full overflow-hidden"
                     style={{ background: 'var(--card-border)' }}
                   >
                     <motion.div

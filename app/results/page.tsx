@@ -53,23 +53,20 @@ export default function ResultsPage() {
           transition={{ type: 'spring', stiffness: 280, damping: 22 }}
           className="card p-6 text-center flex flex-col gap-3"
         >
-          <p
-            className="text-sm font-semibold uppercase tracking-widest"
-            style={{ color: 'var(--muted)' }}
-          >
+          <div className="text-4xl font-extrabold font-heading leading-tight text-gradient">
             {outcomeLabel}
-          </p>
+          </div>
 
           <p
-            className="text-2xl font-extrabold font-heading leading-tight"
-            style={{ color: votedOutIsImposter || allImposters ? 'var(--secondary)' : 'var(--primary)' }}
+            className="text-lg font-bold font-heading mt-1"
+            style={{ color: 'var(--foreground)' }}
           >
             {imposterLabel}
           </p>
 
           {votedOut && (
             <div
-              className="mt-1 pt-3 text-sm"
+              className="pt-3 text-sm"
               style={{ borderTop: '1px solid var(--card-border)', color: 'var(--muted)' }}
             >
               {votedOut} was voted out
@@ -145,7 +142,7 @@ export default function ResultsPage() {
                     <span style={{ color: 'var(--muted)' }}>{votes}</span>
                   </div>
                   <div
-                    className="h-2 rounded-full overflow-hidden"
+                    className="h-4 rounded-full overflow-hidden"
                     style={{ background: 'var(--card-border)' }}
                   >
                     <motion.div
