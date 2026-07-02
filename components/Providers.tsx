@@ -1,0 +1,246 @@
+'use client'
+
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from 'react'
+import { useRouter } from 'next/navigation'
+import { GameConfig, GameState, ImposterHint, RoundState, ThemeId } from '@/lib/types'
+import { assignImposters, drawWord, findTiedPlayers, getVotedOut, tallyVotes } from '@/lib/game-logic'
+import { SOUND_KEY, THEME_KEY, defaultTheme } from '@/lib/theme-config'
+import { allSubcategories } from '@/data/categories/index'
+
+/* ─────────────────────────────────────────────
+   Theme Context
+───────────────────────────────────────────── */
+interface ThemeContextType {
+  theme: ThemeId
+  setTheme: (t: ThemeId) => void
+  sound: boolean
+  toggleSound: () => void
+}
+
+const ThemeContext = createContext<ThemeContextType>({
+  theme: defaultTheme,
+  setTheme: () => {},
+  sound: false,
+  toggleSound: () => {},
+})
+
+export function useTheme() {
+  return useContext(ThemeContext)
+}
+
+/* ─────────────────────────────────────────────
+   Game Context
+───────────────────────────────────────────── */
+interface GameContextType {
+  config: GameConfig | null
+  round: RoundState | null
+  usedWordIds: string[]
+  wordsExhausted: boolean
+  setConfig: (config: GameConfig) => void
+  startRound: () => void
+  advanceReveal: () => void
+  advanceSpeaker: () => void
+  startVoting: () => void
+  submitVote: (voter: string, votedFor: string) => void
+  advanceVote: () => void
+  processVotes: () => void
+  startRevote: (tiedPlayers: string[]) => void
+  proceedToResults: () => void
+  resetUsedWords: () => void
+  resetGame: () => void
+}
+
+const GameContext = createContext<GameContextType>({} as GameContextType)
+
+export function useGame() {
+  return useContext(GameContext)
+}
+
+/* ─────────────────────────────────────────────
+   Combined Providers
+───────────────────────────────────────────── */
+export function Providers({ children }: { children: ReactNode }) {
+  const router = useRouter()
+
+  // ── Theme ──
+  const [theme, setThemeState] = useState<ThemeId>(defaultTheme)
+  const [sound, setSound] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem(THEME_KEY) as ThemeId | null
+    if (saved) setThemeState(saved)
+    const savedSound = localStorage.getItem(SOUND_KEY)
+    if (savedSound === 'true') setSound(true)
+  }, [])
+
+  const setTheme = useCallback((t: ThemeId) => {
+    setThemeState(t)
+    document.documentElement.setAttribute('data-theme', t)
+    localStorage.setItem(THEME_KEY, t)
+  }, [])
+
+  const toggleSound = useCallback(() => {
+    setSound(prev => {
+      const next = !prev
+      localStorage.setItem(SOUND_KEY, String(next))
+      return next
+    })
+  }, [])
+
+  // ── Game state ──
+  const [config, setConfigState] = useState<GameConfig | null>(null)
+  const [round, setRound] = useState<RoundState | null>(null)
+  const [usedWordIds, setUsedWordIds] = useState<string[]>([])
+
+  const setConfig = useCallback((cfg: GameConfig) => {
+    setConfigState(cfg)
+  }, [])
+
+  const startRound = useCallback(() => {
+    if (!config) return
+
+    const drawn = drawWord(allSubcategories, config.selectedSubcategories, usedWordIds, config.customWords)
+    if (!drawn) {
+      // All words exhausted signal handled by wordsExhausted derived state
+      return
+    }
+
+    const imposters = assignImposters(config.players, config.imposterRange)
+
+    const newRound: RoundState = {
+      word: drawn.entry.word,
+      pairedWord: config.imposterHint === 'pairedWord' ? drawn.entry.paired : undefined,
+      hint: config.imposterHint === 'hint' ? drawn.entry.hint : undefined,
+      subcategoryId: drawn.subcategoryId,
+      subcategoryName: drawn.subcategoryName,
+      imposters,
+      revealIndex: 0,
+      speakerIndex: 0,
+      votes: {},
+      tiedPlayers: [],
+      isRevote: false,
+      phase: 'reveal',
+    }
+
+    setUsedWordIds(prev => [...prev, drawn.entry.id])
+    setRound(newRound)
+    router.push('/reveal')
+  }, [config, usedWordIds, router])
+
+  const advanceReveal = useCallback(() => {
+    if (!round || !config) return
+    const nextIndex = round.revealIndex + 1
+    if (nextIndex >= config.players.length) {
+      setRound(prev => prev ? { ...prev, phase: 'clue', revealIndex: nextIndex } : prev)
+      router.push('/game')
+    } else {
+      setRound(prev => prev ? { ...prev, revealIndex: nextIndex } : prev)
+    }
+  }, [round, config, router])
+
+  const advanceSpeaker = useCallback(() => {
+    if (!round || !config) return
+    const nextIndex = round.speakerIndex + 1
+    if (nextIndex >= config.players.length) {
+      setRound(prev => prev ? { ...prev, speakerIndex: 0 } : prev)
+    } else {
+      setRound(prev => prev ? { ...prev, speakerIndex: nextIndex } : prev)
+    }
+  }, [round, config])
+
+  const startVoting = useCallback(() => {
+    if (!round) return
+    setRound(prev => prev ? { ...prev, phase: 'vote', votes: {}, tiedPlayers: [], isRevote: false } : prev)
+    router.push('/vote')
+  }, [round, router])
+
+  const submitVote = useCallback((voter: string, votedFor: string) => {
+    setRound(prev => {
+      if (!prev) return prev
+      return { ...prev, votes: { ...prev.votes, [voter]: votedFor } }
+    })
+  }, [])
+
+  const advanceVote = useCallback(() => {
+    // Called after each player casts their vote to update voteIndex implicitly
+    // The vote page tracks its own local index; we just need to check if all done
+  }, [])
+
+  const processVotes = useCallback(() => {
+    if (!round || !config) return
+
+    const tally = tallyVotes(round.votes)
+    const eligiblePlayers = round.isRevote ? round.tiedPlayers : config.players
+    const tied = findTiedPlayers(tally, eligiblePlayers)
+
+    if (tied.length > 1) {
+      // Another tie — start revote
+      setRound(prev =>
+        prev ? { ...prev, tiedPlayers: tied, isRevote: true, votes: {}, phase: 'vote' } : prev
+      )
+    } else {
+      setRound(prev => prev ? { ...prev, phase: 'tally' } : prev)
+    }
+  }, [round, config])
+
+  const startRevote = useCallback((tiedPlayers: string[]) => {
+    setRound(prev =>
+      prev ? { ...prev, tiedPlayers, isRevote: true, votes: {}, phase: 'vote' } : prev
+    )
+  }, [])
+
+  const proceedToResults = useCallback(() => {
+    setRound(prev => prev ? { ...prev, phase: 'results' } : prev)
+    router.push('/results')
+  }, [router])
+
+  const resetUsedWords = useCallback(() => {
+    setUsedWordIds([])
+  }, [])
+
+  const resetGame = useCallback(() => {
+    setRound(null)
+    setUsedWordIds([])
+  }, [])
+
+  // Derived: all words exhausted for selected categories
+  const wordsExhausted = (() => {
+    if (!config) return false
+    const drawn = drawWord(allSubcategories, config.selectedSubcategories, usedWordIds, config.customWords)
+    return drawn === null
+  })()
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme, sound, toggleSound }}>
+      <GameContext.Provider
+        value={{
+          config,
+          round,
+          usedWordIds,
+          wordsExhausted,
+          setConfig,
+          startRound,
+          advanceReveal,
+          advanceSpeaker,
+          startVoting,
+          submitVote,
+          advanceVote,
+          processVotes,
+          startRevote,
+          proceedToResults,
+          resetUsedWords,
+          resetGame,
+        }}
+      >
+        {children}
+      </GameContext.Provider>
+    </ThemeContext.Provider>
+  )
+}

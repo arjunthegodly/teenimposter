@@ -1,26 +1,146 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* ── Tailwind theme tokens mapped to CSS variables ── */
 @theme inline {
-  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --font-heading: var(--font-heading-family);
+  --font-body: var(--font-body-family);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Dark Neon (default) ── */
+:root {
+  --surface: #0D0D0D;
+  --card: #1A1A2E;
+  --card-border: rgba(139, 92, 246, 0.35);
+  --primary: #8B5CF6;
+  --secondary: #EC4899;
+  --accent: #06B6D4;
+  --foreground: #FFFFFF;
+  --muted: #9CA3AF;
+  --font-heading-family: var(--font-space-grotesk, sans-serif);
+  --font-body-family: var(--font-geist-sans, sans-serif);
+}
+
+/* ── Gradient Glass ── */
+[data-theme="gradient-glass"] {
+  --surface: #5B21B6;
+  --card: rgba(255, 255, 255, 0.1);
+  --card-border: rgba(255, 255, 255, 0.22);
+  --primary: #FFFFFF;
+  --secondary: #F59E0B;
+  --accent: rgba(255, 255, 255, 0.85);
+  --foreground: #FFFFFF;
+  --muted: rgba(255, 255, 255, 0.65);
+  --font-heading-family: var(--font-plus-jakarta, sans-serif);
+  --font-body-family: var(--font-plus-jakarta, sans-serif);
+}
+
+/* ── Bold & Bright ── */
+[data-theme="bold-bright"] {
+  --surface: #FFFFFF;
+  --card: #F9FAFB;
+  --card-border: #E5E7EB;
+  --primary: #F97316;
+  --secondary: #3B82F6;
+  --accent: #111111;
+  --foreground: #111111;
+  --muted: #6B7280;
+  --font-heading-family: var(--font-nunito, sans-serif);
+  --font-body-family: var(--font-nunito, sans-serif);
+}
+
+/* ── Retro / Y2K ── */
+[data-theme="retro-y2k"] {
+  --surface: #0A0A0A;
+  --card: #111111;
+  --card-border: #FF0090;
+  --primary: #FF0090;
+  --secondary: #00FF41;
+  --accent: #C0C0C0;
+  --foreground: #FFFFFF;
+  --muted: #888888;
+  --font-heading-family: var(--font-bebas-neue, sans-serif);
+  --font-body-family: var(--font-ibm-plex-mono, monospace);
+}
+
+/* ── Base body ── */
+html {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--surface);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body-family, sans-serif);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* Gradient glass needs a true gradient background */
+html[data-theme="gradient-glass"] body {
+  background: linear-gradient(135deg, #7C3AED 0%, #2563EB 100%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+/* Retro Y2K scanline overlay */
+html[data-theme="retro-y2k"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Utility helpers ── */
+.font-heading {
+  font-family: var(--font-heading-family, sans-serif);
+}
+
+.card {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 1rem;
+}
+
+.glow-primary {
+  box-shadow: 0 0 20px rgba(var(--primary-rgb, 139 92 246) / 0.4);
+}
+
+/* Neon glow helpers */
+html[data-theme="dark-neon"] .glow-primary {
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.5), 0 0 48px rgba(139, 92, 246, 0.2);
+}
+
+html[data-theme="retro-y2k"] .glow-primary {
+  box-shadow: 0 0 20px rgba(255, 0, 144, 0.6), 0 0 40px rgba(255, 0, 144, 0.3);
+}
+
+/* Bold & Bright shadow */
+html[data-theme="bold-bright"] .card {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Smooth theme transitions */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+}
+
+/* But not for animations — reset transition on animated elements */
+[data-no-transition] {
+  transition: none !important;
 }
