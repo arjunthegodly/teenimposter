@@ -21,6 +21,7 @@ export default function ResultsPage() {
   const tally = tallyVotes(round.votes)
   const votedOut = getVotedOut(tally, round.tiedPlayers.length > 0 ? round.tiedPlayers : config.players)
   const votedOutIsImposter = votedOut ? round.imposters.includes(votedOut) : false
+  const allImposters = round.imposters.length === config.players.length
   const civilianWord = round.word
   const imposterWord = round.pairedWord
 
@@ -39,15 +40,17 @@ export default function ResultsPage() {
           className="card p-6 text-center"
         >
           <p className="text-sm uppercase tracking-widest mb-2" style={{ color: 'var(--muted)' }}>
-            {votedOutIsImposter ? '🎉 Civilians win!' : '😈 Imposter wins!'}
+            {allImposters ? '🤯 Everyone was an imposter!' : votedOutIsImposter ? '🎉 Civilians win!' : '😈 Imposter wins!'}
           </p>
           <p className="text-lg mb-1" style={{ color: 'var(--muted)' }}>
             {votedOut ? `${votedOut} was voted out` : 'No one was voted out'}
           </p>
-          <div className="text-4xl font-bold font-heading mt-3" style={{ color: 'var(--primary)' }}>
-            {round.imposters.length === 1
-              ? `${round.imposters[0]} was the imposter`
-              : `${round.imposters.join(' & ')} were the imposters`}
+          <div className="text-2xl font-bold font-heading mt-3" style={{ color: 'var(--primary)' }}>
+            {allImposters
+              ? 'Every player was an imposter'
+              : round.imposters.length === 1
+                ? `${round.imposters[0]} was the imposter`
+                : `${round.imposters.join(' & ')} were the imposters`}
           </div>
         </motion.div>
 
@@ -60,7 +63,7 @@ export default function ResultsPage() {
         >
           <div>
             <p className="text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--muted)' }}>
-              Civilians had
+              {allImposters ? 'The word nobody knew' : 'Civilians had'}
             </p>
             <p className="text-2xl font-bold font-heading" style={{ color: 'var(--secondary)' }}>
               {civilianWord}

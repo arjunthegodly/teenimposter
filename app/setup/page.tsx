@@ -82,8 +82,8 @@ export default function SetupPage() {
     true,
   ][step]
 
-  const clampMin = (v: number) => Math.max(0, Math.min(v, imposterMax))
-  const clampMax = (v: number) => Math.max(imposterMin, Math.min(v, players.length - 1 || 99))
+  const clampMin = (v: number) => Math.max(1, Math.min(v, imposterMax))
+  const clampMax = (v: number) => Math.max(imposterMin, Math.min(v, players.length || 99))
 
   const handleStart = () => {
     if (wordsExhausted) resetUsedWords()
@@ -396,7 +396,11 @@ export default function SetupPage() {
                 </div>
               </div>
               <p className="text-xs text-center" style={{ color: 'var(--muted)' }}>
-                A random number between {imposterMin} and {imposterMax} will be chosen each round
+                {imposterMin === imposterMax
+                ? imposterMin === players.length && players.length > 0
+                  ? '🤯 Everyone is an imposter!'
+                  : `Exactly ${imposterMin} imposter${imposterMin !== 1 ? 's' : ''} every round`
+                : `${imposterMin}–${imposterMax} imposters — chosen randomly each round${imposterMax === players.length && players.length > 0 ? ' (max = everyone!)' : ''}`}
               </p>
             </div>
 

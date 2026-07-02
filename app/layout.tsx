@@ -6,6 +6,10 @@ import {
   Nunito,
   Bebas_Neue,
   IBM_Plex_Mono,
+  Raleway,
+  Exo_2,
+  DM_Sans,
+  Fredoka,
 } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/Providers'
@@ -21,6 +25,10 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: ['400', '500', '700'],
   subsets: ['latin'],
 })
+const raleway = Raleway({ variable: '--font-raleway', subsets: ['latin'] })
+const exo2 = Exo_2({ variable: '--font-exo2', subsets: ['latin'] })
+const dmSans = DM_Sans({ variable: '--font-dm-sans', subsets: ['latin'] })
+const fredoka = Fredoka({ variable: '--font-fredoka', subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'TeenImposter',
@@ -48,6 +56,10 @@ const fontVars = [
   nunito.variable,
   bebasNeue.variable,
   ibmPlexMono.variable,
+  raleway.variable,
+  exo2.variable,
+  dmSans.variable,
+  fredoka.variable,
 ].join(' ')
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

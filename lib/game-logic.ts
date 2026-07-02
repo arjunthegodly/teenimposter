@@ -2,8 +2,8 @@ import { SubCategoryData, WordEntry } from './types'
 
 export function assignImposters(players: string[], range: [number, number]): string[] {
   const [min, max] = range
-  const clampedMax = Math.min(max, players.length - 1)
-  const clampedMin = Math.max(0, Math.min(min, clampedMax))
+  const clampedMax = Math.min(max, players.length)
+  const clampedMin = Math.max(1, Math.min(min, clampedMax))
   const count = Math.floor(clampedMin + Math.random() * (clampedMax - clampedMin + 1))
 
   const shuffled = [...players].sort(() => Math.random() - 0.5)

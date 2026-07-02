@@ -14,53 +14,65 @@
   --font-body: var(--font-body-family);
 }
 
-/* ── Dark Neon (default) ── */
+/* ─────────────────────────────────────────────────
+   DARK NEON (default)
+   Deep dark + electric purple + hot pink
+───────────────────────────────────────────────── */
 :root {
   --surface: #0D0D0D;
-  --card: #1A1A2E;
-  --card-border: rgba(139, 92, 246, 0.35);
+  --card: #131128;
+  --card-border: rgba(139, 92, 246, 0.28);
   --primary: #8B5CF6;
   --secondary: #EC4899;
   --accent: #06B6D4;
-  --foreground: #FFFFFF;
-  --muted: #9CA3AF;
+  --foreground: #F4F0FF;
+  --muted: #8B8FA8;
   --font-heading-family: var(--font-space-grotesk, sans-serif);
   --font-body-family: var(--font-geist-sans, sans-serif);
 }
 
-/* ── Gradient Glass ── */
+/* ─────────────────────────────────────────────────
+   GRADIENT GLASS
+   Vivid purple→blue gradient + frosted cards
+───────────────────────────────────────────────── */
 [data-theme="gradient-glass"] {
-  --surface: #5B21B6;
-  --card: rgba(255, 255, 255, 0.1);
+  --surface: #4C1D95;
+  --card: rgba(255, 255, 255, 0.13);
   --card-border: rgba(255, 255, 255, 0.22);
-  --primary: #FFFFFF;
-  --secondary: #F59E0B;
+  --primary: #D946EF;
+  --secondary: #FBBF24;
   --accent: rgba(255, 255, 255, 0.85);
   --foreground: #FFFFFF;
-  --muted: rgba(255, 255, 255, 0.65);
+  --muted: rgba(255, 255, 255, 0.6);
   --font-heading-family: var(--font-plus-jakarta, sans-serif);
   --font-body-family: var(--font-plus-jakarta, sans-serif);
 }
 
-/* ── Bold & Bright ── */
+/* ─────────────────────────────────────────────────
+   BOLD & BRIGHT
+   Clean white + bold orange + electric blue
+───────────────────────────────────────────────── */
 [data-theme="bold-bright"] {
   --surface: #FFFFFF;
-  --card: #F9FAFB;
+  --card: #FFFFFF;
   --card-border: #E5E7EB;
   --primary: #F97316;
   --secondary: #3B82F6;
   --accent: #111111;
-  --foreground: #111111;
+  --foreground: #111827;
   --muted: #6B7280;
   --font-heading-family: var(--font-nunito, sans-serif);
   --font-body-family: var(--font-nunito, sans-serif);
 }
 
-/* ── Retro / Y2K ── */
+/* ─────────────────────────────────────────────────
+   RETRO Y2K
+   Black + neon hot pink + matrix green
+───────────────────────────────────────────────── */
 [data-theme="retro-y2k"] {
   --surface: #0A0A0A;
   --card: #111111;
-  --card-border: #FF0090;
+  --card-border: rgba(255, 0, 144, 0.55);
   --primary: #FF0090;
   --secondary: #00FF41;
   --accent: #C0C0C0;
@@ -70,7 +82,60 @@
   --font-body-family: var(--font-ibm-plex-mono, monospace);
 }
 
-/* ── Base body ── */
+/* ─────────────────────────────────────────────────
+   SUNSET VIBE
+   Warm dark purple + coral pink + golden amber
+───────────────────────────────────────────────── */
+[data-theme="sunset-vibe"] {
+  --surface: #0D0414;
+  --card: #1C0A2E;
+  --card-border: rgba(255, 107, 157, 0.28);
+  --primary: #FF6B9D;
+  --secondary: #FFBA08;
+  --accent: #FF8E53;
+  --foreground: #FFF0F5;
+  --muted: #BCA8D0;
+  --font-heading-family: var(--font-raleway, sans-serif);
+  --font-body-family: var(--font-geist-sans, sans-serif);
+}
+
+/* ─────────────────────────────────────────────────
+   OCEAN DEEP
+   Dark navy + electric cyan + mint green
+───────────────────────────────────────────────── */
+[data-theme="ocean-deep"] {
+  --surface: #020C14;
+  --card: #071828;
+  --card-border: rgba(0, 212, 255, 0.2);
+  --primary: #00D4FF;
+  --secondary: #00FFA3;
+  --accent: #4FACFE;
+  --foreground: #E8F9FF;
+  --muted: #5A8FA8;
+  --font-heading-family: var(--font-exo2, sans-serif);
+  --font-body-family: var(--font-dm-sans, sans-serif);
+}
+
+/* ─────────────────────────────────────────────────
+   CANDY POP
+   Soft pink background + hot pink + vibrant purple
+───────────────────────────────────────────────── */
+[data-theme="candy-pop"] {
+  --surface: #FEF0FA;
+  --card: #FFFFFF;
+  --card-border: #F3C0DE;
+  --primary: #E91E8C;
+  --secondary: #7C3AED;
+  --accent: #FF7849;
+  --foreground: #1A0824;
+  --muted: #9B72B0;
+  --font-heading-family: var(--font-fredoka, sans-serif);
+  --font-body-family: var(--font-nunito, sans-serif);
+}
+
+/* ─────────────────────────────────────────────────
+   BASE STYLES
+───────────────────────────────────────────────── */
 html {
   height: 100%;
 }
@@ -83,9 +148,33 @@ body {
   overflow-x: hidden;
 }
 
-/* Gradient glass needs a true gradient background */
+/* ── Special backgrounds ── */
 html[data-theme="gradient-glass"] body {
   background: linear-gradient(135deg, #7C3AED 0%, #2563EB 100%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+html[data-theme="sunset-vibe"] body {
+  background: linear-gradient(135deg, #1A0530 0%, #0D0414 50%, #1E0A0A 100%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+html[data-theme="ocean-deep"] body {
+  background: linear-gradient(160deg, #020C14 0%, #03172A 50%, #010D1A 100%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+html[data-theme="candy-pop"] body {
+  background: linear-gradient(160deg, #FEF0FA 0%, #F5EEFF 100%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+html[data-theme="bold-bright"] body {
+  background: linear-gradient(160deg, #FFFFFF 0%, #F0F4FF 100%);
   background-attachment: fixed;
   min-height: 100dvh;
 }
@@ -99,14 +188,16 @@ html[data-theme="retro-y2k"] body::before {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 0, 0, 0.03) 2px,
-    rgba(0, 0, 0, 0.03) 4px
+    rgba(0, 0, 0, 0.04) 2px,
+    rgba(0, 0, 0, 0.04) 4px
   );
   pointer-events: none;
   z-index: 9999;
 }
 
-/* ── Utility helpers ── */
+/* ─────────────────────────────────────────────────
+   UTILITY HELPERS
+───────────────────────────────────────────────── */
 .font-heading {
   font-family: var(--font-heading-family, sans-serif);
 }
@@ -117,22 +208,41 @@ html[data-theme="retro-y2k"] body::before {
   border-radius: 1rem;
 }
 
-.glow-primary {
-  box-shadow: 0 0 20px rgba(var(--primary-rgb, 139 92 246) / 0.4);
+/* Glow: dark neon */
+html[data-theme="dark-neon"] .glow-primary,
+:root .glow-primary {
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.45), 0 0 48px rgba(139, 92, 246, 0.15);
 }
 
-/* Neon glow helpers */
-html[data-theme="dark-neon"] .glow-primary {
-  box-shadow: 0 0 24px rgba(139, 92, 246, 0.5), 0 0 48px rgba(139, 92, 246, 0.2);
+/* Glow: gradient glass */
+html[data-theme="gradient-glass"] .glow-primary {
+  box-shadow: 0 0 24px rgba(217, 70, 239, 0.5), 0 0 48px rgba(217, 70, 239, 0.2);
 }
 
+/* Glow: retro y2k */
 html[data-theme="retro-y2k"] .glow-primary {
-  box-shadow: 0 0 20px rgba(255, 0, 144, 0.6), 0 0 40px rgba(255, 0, 144, 0.3);
+  box-shadow: 0 0 20px rgba(255, 0, 144, 0.65), 0 0 40px rgba(255, 0, 144, 0.3);
 }
 
-/* Bold & Bright shadow */
-html[data-theme="bold-bright"] .card {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+/* Glow: sunset vibe */
+html[data-theme="sunset-vibe"] .glow-primary {
+  box-shadow: 0 0 24px rgba(255, 107, 157, 0.5), 0 0 48px rgba(255, 107, 157, 0.2);
+}
+
+/* Glow: ocean deep */
+html[data-theme="ocean-deep"] .glow-primary {
+  box-shadow: 0 0 24px rgba(0, 212, 255, 0.5), 0 0 48px rgba(0, 212, 255, 0.15);
+}
+
+/* Glow: candy pop */
+html[data-theme="candy-pop"] .glow-primary {
+  box-shadow: 0 0 20px rgba(233, 30, 140, 0.35), 0 0 40px rgba(233, 30, 140, 0.1);
+}
+
+/* Card shadows for light themes */
+html[data-theme="bold-bright"] .card,
+html[data-theme="candy-pop"] .card {
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
 }
 
 /* Smooth theme transitions */
@@ -140,7 +250,6 @@ html[data-theme="bold-bright"] .card {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
 }
 
-/* But not for animations — reset transition on animated elements */
 [data-no-transition] {
   transition: none !important;
 }
