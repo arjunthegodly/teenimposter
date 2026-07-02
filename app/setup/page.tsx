@@ -88,7 +88,7 @@ export default function SetupPage() {
   const handleStart = () => {
     if (wordsExhausted) resetUsedWords()
 
-    const config: GameConfig = {
+    const cfg: GameConfig = {
       players,
       selectedSubcategories: selectedSubs,
       customWords,
@@ -97,8 +97,8 @@ export default function SetupPage() {
       speedRound: { enabled: speedEnabled, duration: speedDuration },
       timer: { enabled: timerEnabled, duration: timerDuration },
     }
-    setConfig(config)
-    startRound()
+    setConfig(cfg)
+    startRound(cfg)
   }
 
   return (

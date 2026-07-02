@@ -44,7 +44,7 @@ interface GameContextType {
   usedWordIds: string[]
   wordsExhausted: boolean
   setConfig: (config: GameConfig) => void
-  startRound: () => void
+  startRound: (overrideConfig?: GameConfig) => void
   advanceReveal: () => void
   advanceSpeaker: () => void
   startVoting: () => void
@@ -52,7 +52,7 @@ interface GameContextType {
   advanceVote: () => void
   processVotes: () => void
   startRevote: (tiedPlayers: string[]) => void
-  proceedToResults: () => void
+  proceedToResults: (finalVotes: Record<string, string>) => void
   resetUsedWords: () => void
   resetGame: () => void
 }
@@ -103,21 +103,22 @@ export function Providers({ children }: { children: ReactNode }) {
     setConfigState(cfg)
   }, [])
 
-  const startRound = useCallback(() => {
-    if (!config) return
+  const startRound = useCallback((overrideConfig?: GameConfig) => {
+    const cfg = overrideConfig ?? config
+    if (!cfg) return
 
-    const drawn = drawWord(allSubcategories, config.selectedSubcategories, usedWordIds, config.customWords)
+    const drawn = drawWord(allSubcategories, cfg.selectedSubcategories, usedWordIds, cfg.customWords)
     if (!drawn) {
       // All words exhausted signal handled by wordsExhausted derived state
       return
     }
 
-    const imposters = assignImposters(config.players, config.imposterRange)
+    const imposters = assignImposters(cfg.players, cfg.imposterRange)
 
     const newRound: RoundState = {
       word: drawn.entry.word,
-      pairedWord: config.imposterHint === 'pairedWord' ? drawn.entry.paired : undefined,
-      hint: config.imposterHint === 'hint' ? drawn.entry.hint : undefined,
+      pairedWord: cfg.imposterHint === 'pairedWord' ? drawn.entry.paired : undefined,
+      hint: cfg.imposterHint === 'hint' ? drawn.entry.hint : undefined,
       subcategoryId: drawn.subcategoryId,
       subcategoryName: drawn.subcategoryName,
       imposters,
@@ -196,8 +197,8 @@ export function Providers({ children }: { children: ReactNode }) {
     )
   }, [])
 
-  const proceedToResults = useCallback(() => {
-    setRound(prev => prev ? { ...prev, phase: 'results' } : prev)
+  const proceedToResults = useCallback((finalVotes: Record<string, string>) => {
+    setRound(prev => prev ? { ...prev, phase: 'results', votes: finalVotes } : prev)
     router.push('/results')
   }, [router])
 

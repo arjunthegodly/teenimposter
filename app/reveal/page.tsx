@@ -16,7 +16,7 @@ export default function RevealPage() {
   const [flipped, setFlipped] = useState(false)
 
   useEffect(() => {
-    if (!config || !round || round.phase !== 'reveal') router.replace('/')
+    if (!config || !round) router.replace('/')
   }, [config, round, router])
 
   if (!config || !round || round.phase !== 'reveal') return null
@@ -58,16 +58,16 @@ export default function RevealPage() {
       >
         IMPOSTER
       </div>
-      {round.pairedWord && (
+      {config.imposterHint === 'pairedWord' && round.pairedWord && (
         <div className="flex flex-col items-center gap-1 mt-2">
           <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--muted)' }}>Your word</p>
           <p className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>{round.pairedWord}</p>
         </div>
       )}
-      {round.hint && !round.pairedWord && (
+      {config.imposterHint === 'hint' && round.hint && (
         <p className="text-sm max-w-xs text-center" style={{ color: 'var(--muted)' }}>{round.hint}</p>
       )}
-      {round.subcategoryId && !round.pairedWord && !round.hint && (
+      {config.imposterHint === 'category' && (
         <p className="text-sm" style={{ color: 'var(--muted)' }}>{round.subcategoryName}</p>
       )}
     </div>

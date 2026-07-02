@@ -13,6 +13,8 @@ export function Timer({ seconds, onExpire, running = true, className = '' }: Tim
   const [remaining, setRemaining] = useState(seconds)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const expiredRef = useRef(false)
+  const onExpireRef = useRef(onExpire)
+  onExpireRef.current = onExpire
 
   useEffect(() => {
     setRemaining(seconds)
@@ -31,7 +33,7 @@ export function Timer({ seconds, onExpire, running = true, className = '' }: Tim
           clearInterval(intervalRef.current!)
           if (!expiredRef.current) {
             expiredRef.current = true
-            onExpire()
+            onExpireRef.current()
           }
           return 0
         }
@@ -40,7 +42,7 @@ export function Timer({ seconds, onExpire, running = true, className = '' }: Tim
     }, 1000)
 
     return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
-  }, [running, onExpire])
+  }, [running])
 
   const isLow = remaining <= 10
   const pct = (remaining / seconds) * 100

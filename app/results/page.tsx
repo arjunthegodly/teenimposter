@@ -131,7 +131,7 @@ export default function ResultsPage() {
             </button>
           ) : (
             <button
-              onClick={startRound}
+              onClick={() => startRound()}
               className="w-full py-4 rounded-2xl font-bold text-lg font-heading glow-primary transition-all active:scale-95"
               style={{ background: 'var(--primary)', color: '#fff' }}
             >

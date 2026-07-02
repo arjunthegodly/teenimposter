@@ -13,7 +13,7 @@ export default function GamePage() {
   const { config, round, advanceSpeaker, startVoting } = useGame()
 
   useEffect(() => {
-    if (!config || !round || round.phase !== 'clue') router.replace('/')
+    if (!config || !round) router.replace('/')
   }, [config, round, router])
 
   if (!config || !round || round.phase !== 'clue') return null

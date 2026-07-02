@@ -26,7 +26,7 @@ export default function VotePage() {
   if (!config || !round) return null
 
   // Eligible voters: in a revote, only the tied players vote
-  const voters = round.isRevote ? round.tiedPlayers : config.players
+  const voters = isLocalRevote ? localTied : config.players
   const currentVoter = voters[localVoteIndex]
   const allVoted = localVoteIndex >= voters.length
 
@@ -61,7 +61,7 @@ export default function VotePage() {
   }
 
   const handleReveal = () => {
-    proceedToResults()
+    proceedToResults(localVotes)
   }
 
   const tally = tallyVotes(localVotes)
