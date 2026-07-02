@@ -21,14 +21,14 @@ export function CardFlip({ front, back, onFlip }: CardFlipProps) {
   return (
     <div
       className="relative w-full cursor-pointer select-none"
-      style={{ perspective: '1000px', height: '280px' }}
+      style={{ perspective: '1200px', height: '280px' }}
       onClick={handleFlip}
     >
       {/* Front */}
       <motion.div
-        className="absolute inset-0 card flex flex-col items-center justify-center gap-4 p-6 glow-primary"
+        className={`absolute inset-0 card flex flex-col items-center justify-center gap-4 p-6 ${!flipped ? 'card-interactive' : ''}`}
         animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
         style={{ backfaceVisibility: 'hidden', transformStyle: 'preserve-3d' }}
       >
         {front}
@@ -39,7 +39,7 @@ export function CardFlip({ front, back, onFlip }: CardFlipProps) {
         className="absolute inset-0 card flex flex-col items-center justify-center gap-4 p-6"
         initial={{ rotateY: -180 }}
         animate={{ rotateY: flipped ? 0 : -180 }}
-        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
         style={{ backfaceVisibility: 'hidden', transformStyle: 'preserve-3d' }}
       >
         {back}

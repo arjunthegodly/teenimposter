@@ -11,27 +11,47 @@ interface PassScreenProps {
 export function PassScreen({ name, onReady, label = 'Tap when ready' }: PassScreenProps) {
   return (
     <motion.div
-      className="flex flex-col items-center justify-center gap-8 h-full min-h-80"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+      className="flex flex-col items-center justify-center gap-8 min-h-80 py-6"
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
     >
-      <div className="flex flex-col items-center gap-3 text-center">
-        <p className="text-lg" style={{ color: 'var(--muted)' }}>Pass to</p>
-        <h2
-          className="text-4xl font-bold font-heading"
-          style={{ color: 'var(--primary)' }}
+      <div className="flex flex-col items-center gap-5 text-center">
+        {/* Avatar with initial */}
+        <div
+          className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold font-heading glow-primary flex-shrink-0"
+          style={{ background: 'var(--primary)', color: '#fff' }}
         >
-          {name}
-        </h2>
-        <p className="text-sm" style={{ color: 'var(--muted)' }}>
-          Make sure only {name} can see the screen
+          {name.charAt(0).toUpperCase()}
+        </div>
+
+        <div className="flex flex-col items-center gap-1">
+          <p
+            className="text-xs uppercase tracking-widest font-semibold"
+            style={{ color: 'var(--muted)' }}
+          >
+            Pass to
+          </p>
+          <h2
+            className="text-5xl font-extrabold font-heading leading-tight"
+            style={{ color: 'var(--foreground)' }}
+          >
+            {name}
+          </h2>
+        </div>
+
+        <p className="text-sm max-w-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
+          Turn the screen away until {name} is ready
         </p>
       </div>
 
+      {/* Divider */}
+      <div className="w-12 h-px" style={{ background: 'var(--card-border)' }} />
+
       <button
         onClick={onReady}
-        className="px-10 py-4 rounded-2xl text-xl font-bold font-heading glow-primary transition-transform active:scale-95"
+        className="px-10 py-4 rounded-2xl text-lg font-bold font-heading glow-primary transition-transform active:scale-95"
         style={{ background: 'var(--primary)', color: '#fff' }}
       >
         {label} →

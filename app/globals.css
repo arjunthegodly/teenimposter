@@ -253,3 +253,54 @@ html[data-theme="candy-pop"] .card {
 [data-no-transition] {
   transition: none !important;
 }
+
+/* ─────────────────────────────────────────────────
+   GLOBAL POLISH
+───────────────────────────────────────────────── */
+
+/* Thin themed scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 2px;
+}
+
+/* Text selection */
+::selection {
+  background: var(--primary);
+  color: #fff;
+  opacity: 0.3;
+}
+
+/* Input focus ring using theme primary */
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--primary) !important;
+  transition: box-shadow 0.15s ease;
+}
+
+/* Tap highlight off on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Shimmer animation for interactive cards ── */
+@keyframes card-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--primary); opacity: 1; }
+  50%       { box-shadow: 0 0 20px 4px var(--primary); opacity: 0.85; }
+}
+
+.card-interactive {
+  animation: card-pulse 2.4s ease-in-out infinite;
+  cursor: pointer;
+}
+
+/* ── Gradient text utility ── */
+.text-gradient {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
