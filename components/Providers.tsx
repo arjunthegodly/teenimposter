@@ -52,11 +52,11 @@ interface GameContextType {
   advanceReveal: () => void
   advanceSpeaker: () => void
   startVoting: () => void
-  submitVote: (voter: string, votedFor: string) => void
+  submitVote: (voter: string, votedFor: string[]) => void
   advanceVote: () => void
   processVotes: () => void
   startRevote: (tiedPlayers: string[]) => void
-  proceedToResults: (finalVotes: Record<string, string>) => void
+  proceedToResults: (finalVotes: Record<string, string[]>) => void
   submitAnswer: (player: string, answer: string) => void
   submitChameleonGuess: (guess: string) => void
   resetUsedWords: () => void
@@ -218,7 +218,7 @@ export function Providers({ children }: { children: ReactNode }) {
     router.push('/vote')
   }, [round, router])
 
-  const submitVote = useCallback((voter: string, votedFor: string) => {
+  const submitVote = useCallback((voter: string, votedFor: string[]) => {
     setRound(prev => {
       if (!prev) return prev
       return { ...prev, votes: { ...prev.votes, [voter]: votedFor } }
@@ -249,7 +249,7 @@ export function Providers({ children }: { children: ReactNode }) {
     )
   }, [])
 
-  const proceedToResults = useCallback((finalVotes: Record<string, string>) => {
+  const proceedToResults = useCallback((finalVotes: Record<string, string[]>) => {
     if (!round || !config) return
 
     // Update session scores

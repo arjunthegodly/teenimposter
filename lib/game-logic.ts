@@ -125,10 +125,12 @@ export function drawChameleonRound(
   }
 }
 
-export function tallyVotes(votes: Record<string, string>): Map<string, number> {
+export function tallyVotes(votes: Record<string, string[]>): Map<string, number> {
   const tally = new Map<string, number>()
-  for (const votedFor of Object.values(votes)) {
-    tally.set(votedFor, (tally.get(votedFor) ?? 0) + 1)
+  for (const votedForList of Object.values(votes)) {
+    for (const votedFor of votedForList) {
+      tally.set(votedFor, (tally.get(votedFor) ?? 0) + 1)
+    }
   }
   return tally
 }

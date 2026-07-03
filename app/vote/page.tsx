@@ -16,7 +16,7 @@ export default function VotePage() {
   const [localVoteIndex, setLocalVoteIndex] = useState(0)
   const [showingPass, setShowingPass] = useState(true)
   const [showTally, setShowTally] = useState(false)
-  const [localVotes, setLocalVotes] = useState<Record<string, string>>({})
+  const [localVotes, setLocalVotes] = useState<Record<string, string[]>>({})
   const [localTied, setLocalTied] = useState<string[]>([])
   const [isLocalRevote, setIsLocalRevote] = useState(false)
   const redirected = useRef(false)
@@ -40,7 +40,7 @@ export default function VotePage() {
 
   const handleReady = () => setShowingPass(false)
 
-  const handleVote = (votedFor: string) => {
+  const handleVote = (votedFor: string[]) => {
     const newVotes = { ...localVotes, [currentVoter]: votedFor }
     setLocalVotes(newVotes)
     submitVote(currentVoter, votedFor)

@@ -56,7 +56,7 @@ export interface RoundState {
   imposters: string[]
   revealIndex: number
   speakerIndex: number
-  votes: Record<string, string>
+  votes: Record<string, string[]>
   tiedPlayers: string[]
   isRevote: boolean
   phase: 'reveal' | 'clue' | 'vote' | 'tally' | 'results'
