@@ -11,7 +11,7 @@ import { ArrowRight, RotateCcw, Settings, Home } from 'lucide-react'
 
 export default function ResultsPage() {
   const router = useRouter()
-  const { config, round, startRound, resetGame, wordsExhausted } = useGame()
+  const { config, round, startRound, resetGame, wordsExhausted, sessionScores } = useGame()
 
   useEffect(() => {
     if (!config || !round) router.replace('/')
@@ -170,11 +170,59 @@ export default function ResultsPage() {
           </motion.div>
         )}
 
+        {/* Session scores */}
+        {Object.keys(sessionScores).length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="card p-5 flex flex-col gap-3"
+          >
+            <p
+              className="text-xs uppercase tracking-widest font-semibold"
+              style={{ color: 'var(--muted)' }}
+            >
+              🏆 Session scores
+            </p>
+            {config.players
+              .slice()
+              .sort((a, b) => (sessionScores[b] ?? 0) - (sessionScores[a] ?? 0))
+              .map((player, i) => {
+                const pts = sessionScores[player] ?? 0
+                const maxPts = Math.max(...config.players.map(p => sessionScores[p] ?? 0), 1)
+                const isLeader = pts === maxPts && pts > 0
+                return (
+                  <div key={player} className="flex items-center gap-3">
+                    <span
+                      className="text-xs w-5 text-center font-bold flex-shrink-0"
+                      style={{ color: 'var(--muted)' }}
+                    >
+                      {i + 1}
+                    </span>
+                    <span
+                      className="flex-1 text-sm font-semibold"
+                      style={{ color: isLeader ? 'var(--secondary)' : 'var(--foreground)' }}
+                    >
+                      {player}
+                      {isLeader && ' 👑'}
+                    </span>
+                    <span
+                      className="text-sm font-bold font-heading"
+                      style={{ color: isLeader ? 'var(--secondary)' : 'var(--primary)' }}
+                    >
+                      {pts} pt{pts !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )
+              })}
+          </motion.div>
+        )}
+
         {/* Actions */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.35 }}
+          transition={{ delay: 0.45 }}
           className="flex flex-col gap-2.5 pt-1"
         >
           {wordsExhausted ? (

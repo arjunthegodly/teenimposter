@@ -1,16 +1,17 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useGame } from '@/components/Providers'
 import { Timer } from '@/components/Timer'
 import { GameLayout } from '@/components/GameLayout'
-import { SkipForward, ArrowRight } from 'lucide-react'
+import { SkipForward, ArrowRight, Trophy, X } from 'lucide-react'
 
 export default function GamePage() {
   const router = useRouter()
-  const { config, round, advanceSpeaker, startVoting } = useGame()
+  const { config, round, advanceSpeaker, startVoting, sessionScores } = useGame()
+  const [showScores, setShowScores] = useState(false)
 
   useEffect(() => {
     if (!config || !round) router.replace('/')
@@ -33,21 +34,96 @@ export default function GamePage() {
       <div className="flex flex-col gap-5">
 
         {/* Header */}
-        <div>
-          <h1
-            className="text-3xl font-extrabold font-heading"
-            style={{ color: 'var(--foreground)' }}
-          >
-            {isQuestionMode ? 'Share your answers' : 'Give your clues'}
-          </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
-            {isSpeedRound
-              ? `⚡ Speed round — ${speedDuration}s per player`
-              : isQuestionMode
-              ? 'Take turns sharing your answer — try to sound like everyone else'
-              : 'One clue each, no repeating what others said'}
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1
+              className="text-3xl font-extrabold font-heading"
+              style={{ color: 'var(--foreground)' }}
+            >
+              {isQuestionMode ? 'Share your answers' : 'Give your clues'}
+            </h1>
+            <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
+              {isSpeedRound
+                ? `⚡ Speed round — ${speedDuration}s per player`
+                : isQuestionMode
+                ? 'Take turns sharing your answer — try to sound like everyone else'
+                : 'One clue each, no repeating what others said'}
+            </p>
+          </div>
+          {Object.keys(sessionScores).length > 0 && (
+            <button
+              onClick={() => setShowScores(true)}
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all active:scale-90"
+              style={{ background: 'var(--card)', border: '1px solid var(--card-border)', color: 'var(--muted)' }}
+            >
+              <Trophy size={12} style={{ color: 'var(--secondary)' }} />
+              Scores
+            </button>
+          )}
         </div>
+
+        {/* Scores modal */}
+        <AnimatePresence>
+          {showScores && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-end justify-center"
+              style={{ background: 'rgba(0,0,0,0.6)' }}
+              onClick={() => setShowScores(false)}
+            >
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+                className="w-full max-w-md p-5 rounded-t-3xl flex flex-col gap-4"
+                style={{ background: 'var(--card)', border: '1px solid var(--card-border)' }}
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="font-bold font-heading text-lg" style={{ color: 'var(--foreground)' }}>
+                    🏆 Session Scores
+                  </p>
+                  <button onClick={() => setShowScores(false)} style={{ color: 'var(--muted)' }}>
+                    <X size={18} />
+                  </button>
+                </div>
+                {config.players
+                  .slice()
+                  .sort((a, b) => (sessionScores[b] ?? 0) - (sessionScores[a] ?? 0))
+                  .map((player, i) => {
+                    const pts = sessionScores[player] ?? 0
+                    const maxPts = Math.max(...config.players.map(p => sessionScores[p] ?? 0), 1)
+                    const isLeader = pts === maxPts && pts > 0
+                    return (
+                      <div key={player} className="flex items-center gap-3">
+                        <span
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                          style={{
+                            background: isLeader ? 'var(--secondary)' : 'var(--card-border)',
+                            color: isLeader ? '#fff' : 'var(--muted)',
+                          }}
+                        >
+                          {i + 1}
+                        </span>
+                        <span className="flex-1 font-semibold text-sm" style={{ color: 'var(--foreground)' }}>
+                          {player}{isLeader ? ' 👑' : ''}
+                        </span>
+                        <span
+                          className="font-bold text-sm font-heading"
+                          style={{ color: isLeader ? 'var(--secondary)' : 'var(--primary)' }}
+                        >
+                          {pts} pt{pts !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    )
+                  })}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Question mode reminder */}
         {isQuestionMode && (

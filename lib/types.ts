@@ -44,6 +44,7 @@ export interface GameConfig {
   imposterHint: ImposterHint
   speedRound: { enabled: boolean; duration: number }
   timer: { enabled: boolean; duration: number }
+  lastStand: boolean
 }
 
 export interface RoundState {

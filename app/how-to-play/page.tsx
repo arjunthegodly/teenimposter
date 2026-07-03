@@ -3,169 +3,122 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { GameLayout } from '@/components/GameLayout'
-import { ArrowRight } from 'lucide-react'
 
-const wordSteps = [
+const wordModeSteps = [
   {
-    n: '01',
     emoji: '👥',
-    title: 'Enter player names',
-    body: 'Add everyone playing. You need at least 3 people. One phone for the whole group.',
+    title: 'Gather 3+ players',
+    body: 'Sit in a circle with one phone. One person sets up the game — add player names and pick categories.',
   },
   {
-    n: '02',
     emoji: '🃏',
-    title: 'Each player secretly sees their word',
-    body: 'The phone gets passed around. Each player taps to flip their card. Civilians all get the same word — imposters get a hint (or nothing) and see "IMPOSTER".',
+    title: 'Pass & reveal',
+    body: 'The phone goes around. Each player secretly taps to see their word — civilians all get the same word, the imposter gets something different (or nothing).',
   },
   {
-    n: '03',
     emoji: '💬',
-    title: 'Give one clue each',
-    body: 'Go around the circle. Each player gives ONE word or short clue related to the secret word. Prove you know it — but don\'t make it too easy for the imposter.',
+    title: 'Give clues',
+    body: 'Go around the circle. Each player gives ONE clue related to the word. Be specific enough to prove you know it — but not so obvious the imposter can copy you.',
   },
   {
-    n: '04',
     emoji: '🗳️',
-    title: 'Vote privately',
-    body: 'Everyone suspects someone. The phone passes around and each player secretly votes for who they think is the imposter.',
+    title: 'Vote',
+    body: 'Everyone discusses, then votes privately. The person with the most votes is eliminated.',
   },
   {
-    n: '05',
-    emoji: '🎭',
-    title: 'Reveal the truth',
-    body: 'Find out if you caught the imposter! Civilians win if the imposter gets voted out. If not — the imposter wins.',
-  },
-]
-
-const questionSteps = [
-  {
-    n: '01',
-    emoji: '👥',
-    title: 'Enter player names',
-    body: 'Same as always — 3+ players, one phone, pass and play.',
-  },
-  {
-    n: '02',
-    emoji: '❓',
-    title: 'Each player gets a question',
-    body: 'The phone passes around. Everyone flips their card and reads their question. The imposter gets a slightly different question about the same topic — and has NO IDEA they\'re the imposter.',
-  },
-  {
-    n: '03',
-    emoji: '🎤',
-    title: 'Everyone shares their answer',
-    body: 'Go around and each player answers their question out loud. The imposter answers their question honestly — but their answer sounds subtly off to everyone else.',
-  },
-  {
-    n: '04',
-    emoji: '🔍',
-    title: 'Discuss and vote',
-    body: 'Who sounded like they answered something different? Someone\'s answer was suspiciously off-topic. Vote for who you think got a different question.',
-  },
-  {
-    n: '05',
     emoji: '🎭',
     title: 'Reveal',
-    body: 'See who the imposter was and what question they had! The twist: they didn\'t know they were the imposter the whole time.',
+    body: 'Find out if you caught the right person! Civilians win if the imposter was voted out. Imposter wins if they survived.',
   },
 ]
 
-const features = [
+const questionModeSteps = [
   {
-    icon: '🔄',
-    name: 'Paired Word',
-    desc: 'Imposter gets a similar-but-different word (e.g. civilians have "Minecraft", imposter has "Roblox"). Harder to bluff, harder to catch.',
+    emoji: '❓',
+    title: 'A question for everyone',
+    body: "All civilians get the same question to answer out loud — like \"What's your go-to fast food order?\" The imposter secretly gets a slightly different question about the same topic.",
   },
   {
-    icon: '🕵️',
-    name: 'Question Mode',
-    desc: 'A totally different format. Everyone answers a question — but the imposter got asked something slightly different. They don\'t even know they\'re the imposter.',
+    emoji: '🕵️',
+    title: 'The blind imposter',
+    body: "Here's the twist: the imposter has NO idea they're the imposter. Their card looks identical to everyone else's. They genuinely think they got the same question.",
   },
   {
-    icon: '⚡',
-    name: 'Speed Round',
-    desc: 'Timer per player. You\'ve got 15 seconds to give your clue (or answer). No overthinking, no stalling.',
+    emoji: '🎤',
+    title: 'Everyone answers',
+    body: "Take turns sharing your answer out loud. Civilians try to sound normal. The imposter answers honestly — but since their question was different, their answer might sound subtly off.",
   },
   {
-    icon: '😈',
-    name: 'Multiple Imposters',
-    desc: 'Set a range. Maybe it\'s 1 imposter, maybe it\'s 3. Nobody knows how many are hiding until the reveal.',
-  },
-  {
-    icon: '🤯',
-    name: 'All Imposters',
-    desc: 'Set min and max both to the player count. Everyone is secretly an imposter — chaos mode activated.',
-  },
-  {
-    icon: '🏷️',
-    name: '10 Themes',
-    desc: 'Switch themes mid-game. Dark Neon, Rose Gold, Cyber Pulse, Dark Academia, and more — each with unique fonts and vibes.',
+    emoji: '🔍',
+    title: 'Spot who sounds off',
+    body: "Listen carefully. Someone's answer will be slightly adjacent to everyone else's. Vote for who you think got a different question.",
   },
 ]
 
-const tips = [
-  { mode: 'Word', tip: 'Civilian? Be specific enough to prove you know the word, but vague enough the imposter can\'t copy you.' },
-  { mode: 'Word', tip: 'Imposter? Listen to the first few clues and build a mental picture of what the word might be before your turn.' },
-  { mode: 'Question', tip: 'Listen for answers that are technically valid but feel slightly off-topic. That\'s the imposter.' },
-  { mode: 'Question', tip: 'Imposter? Answer your question honestly and hope it sounds close enough. You literally can\'t know exactly what to fake.' },
-  { mode: 'Both', tip: 'Don\'t always vote for the most nervous person — experienced imposters might try to act normal.' },
-  { mode: 'Both', tip: 'If there\'s a tie in voting, you go to a revote — only the tied players are options.' },
+const modes = [
+  {
+    name: '🔄 Paired Word',
+    desc: "In Word Mode, the imposter gets a similar-but-wrong word (e.g. civilians have \"Minecraft\", imposter has \"Roblox\"). Even harder to catch!",
+  },
+  {
+    name: '⚡ Speed Round',
+    desc: 'Each player has a limited time to give their answer or clue. No overthinking allowed.',
+  },
+  {
+    name: '👥 Multiple Imposters',
+    desc: 'Set a range and let fate decide how many imposters are hiding in your group.',
+  },
 ]
 
 export default function HowToPlayPage() {
   return (
     <GameLayout>
-      <div className="flex flex-col gap-8 pb-8">
+      <div className="flex flex-col gap-6 pb-8">
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-sm transition-opacity" style={{ color: 'var(--muted)' }}>
+          <Link href="/" className="text-sm transition-opacity hover:opacity-70" style={{ color: 'var(--muted)' }}>
             ← Back
           </Link>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h1 className="text-4xl font-extrabold font-heading text-gradient leading-tight">
+        <div>
+          <h1 className="text-4xl font-bold font-heading" style={{ color: 'var(--primary)' }}>
             How to Play
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>
-            Two modes. One imposter. Everyone gets fooled.
+            TeenImposter — two ways to play
           </p>
-        </motion.div>
+        </div>
 
-        {/* Word Mode Steps */}
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <div
-              className="px-3 py-1 rounded-full text-xs font-bold font-heading"
+        {/* Word Mode */}
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <h2 className="text-xl font-bold font-heading" style={{ color: 'var(--foreground)' }}>
+              💬 Word Mode
+            </h2>
+            <span
+              className="text-xs px-2 py-0.5 rounded-full font-semibold"
               style={{ background: 'var(--secondary)', color: '#fff' }}
             >
-              Word Mode
-            </div>
-            <p className="text-xs" style={{ color: 'var(--muted)' }}>Classic format</p>
+              Classic
+            </span>
           </div>
           <div className="flex flex-col gap-3">
-            {wordSteps.map((step, i) => (
+            {wordModeSteps.map((step, i) => (
               <motion.div
-                key={step.n}
+                key={step.title}
                 initial={{ opacity: 0, x: -16 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.06 }}
                 className="card p-4 flex gap-4"
               >
-                <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                  <span
-                    className="text-xs font-bold font-heading tabular-nums"
-                    style={{ color: 'var(--primary)' }}
-                  >
-                    {step.n}
-                  </span>
-                  <span className="text-xl">{step.emoji}</span>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0"
+                  style={{ background: 'var(--card-border)' }}
+                >
+                  {step.emoji}
                 </div>
                 <div>
-                  <p className="font-bold font-heading text-sm" style={{ color: 'var(--foreground)' }}>
+                  <p className="font-bold font-heading" style={{ color: 'var(--foreground)' }}>
                     {step.title}
                   </p>
                   <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--muted)' }}>
@@ -175,39 +128,38 @@ export default function HowToPlayPage() {
               </motion.div>
             ))}
           </div>
-        </section>
+        </div>
 
-        {/* Question Mode Steps */}
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <div
-              className="px-3 py-1 rounded-full text-xs font-bold font-heading"
+        {/* Question Mode */}
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <h2 className="text-xl font-bold font-heading" style={{ color: 'var(--foreground)' }}>
+              🕵️ Question Mode
+            </h2>
+            <span
+              className="text-xs px-2 py-0.5 rounded-full font-semibold"
               style={{ background: 'var(--primary)', color: '#fff' }}
             >
-              Question Mode
-            </div>
-            <p className="text-xs" style={{ color: 'var(--muted)' }}>Blind imposter twist</p>
+              New
+            </span>
           </div>
           <div className="flex flex-col gap-3">
-            {questionSteps.map((step, i) => (
+            {questionModeSteps.map((step, i) => (
               <motion.div
-                key={step.n + 'q'}
+                key={step.title}
                 initial={{ opacity: 0, x: -16 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 + i * 0.06 }}
                 className="card p-4 flex gap-4"
               >
-                <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                  <span
-                    className="text-xs font-bold font-heading tabular-nums"
-                    style={{ color: 'var(--primary)' }}
-                  >
-                    {step.n}
-                  </span>
-                  <span className="text-xl">{step.emoji}</span>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0"
+                  style={{ background: 'var(--card-border)' }}
+                >
+                  {step.emoji}
                 </div>
                 <div>
-                  <p className="font-bold font-heading text-sm" style={{ color: 'var(--foreground)' }}>
+                  <p className="font-bold font-heading" style={{ color: 'var(--foreground)' }}>
                     {step.title}
                   </p>
                   <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--muted)' }}>
@@ -217,74 +169,53 @@ export default function HowToPlayPage() {
               </motion.div>
             ))}
           </div>
-        </section>
+        </div>
 
-        {/* Features grid */}
-        <section>
-          <h2
-            className="text-xl font-extrabold font-heading mb-4"
-            style={{ color: 'var(--secondary)' }}
-          >
-            Features
+        {/* Game modes / options */}
+        <div>
+          <h2 className="text-xl font-bold font-heading mb-3" style={{ color: 'var(--secondary)' }}>
+            Extra Options
           </h2>
-          <div className="grid grid-cols-2 gap-2.5">
-            {features.map((f, i) => (
+          <div className="flex flex-col gap-3">
+            {modes.map((mode, i) => (
               <motion.div
-                key={f.name}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + i * 0.05 }}
-                className="card p-4 flex flex-col gap-2"
+                key={mode.name}
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.55 + i * 0.06 }}
+                className="card p-4"
               >
-                <span className="text-2xl">{f.icon}</span>
                 <p className="font-bold text-sm font-heading" style={{ color: 'var(--primary)' }}>
-                  {f.name}
+                  {mode.name}
                 </p>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
-                  {f.desc}
+                <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--muted)' }}>
+                  {mode.desc}
                 </p>
               </motion.div>
             ))}
           </div>
-        </section>
+        </div>
 
         {/* Tips */}
-        <section className="card p-5">
-          <h3 className="font-bold font-heading mb-4" style={{ color: 'var(--accent)' }}>
+        <div className="card p-5">
+          <h3 className="font-bold font-heading mb-3" style={{ color: 'var(--accent)' }}>
             💡 Pro Tips
           </h3>
-          <div className="flex flex-col gap-3">
-            {tips.map((tip, i) => (
-              <div key={i} className="flex gap-3 items-start">
-                <span
-                  className="text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 mt-0.5"
-                  style={{
-                    background: tip.mode === 'Word'
-                      ? 'var(--secondary)'
-                      : tip.mode === 'Question'
-                      ? 'var(--primary)'
-                      : 'var(--card-border)',
-                    color: tip.mode === 'Both' ? 'var(--muted)' : '#fff',
-                    fontSize: '9px',
-                  }}
-                >
-                  {tip.mode}
-                </span>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
-                  {tip.tip}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
+          <ul className="flex flex-col gap-2 text-sm" style={{ color: 'var(--muted)' }}>
+            <li>• In Word Mode: give clues that are related but not too obvious — you want to prove you know the word without letting the imposter steal your clue</li>
+            <li>• In Question Mode: listen for who sounds like they answered a slightly different question — not wrong, just off by one degree</li>
+            <li>• Watch reactions when others give clues — the imposter might hesitate or overcorrect</li>
+            <li>• Don&apos;t always vote for the most suspicious person — sometimes that&apos;s exactly what the imposter wants</li>
+            <li>• If you&apos;re the imposter in Question Mode: answer honestly — acting natural is your best defense</li>
+          </ul>
+        </div>
 
         <Link
           href="/setup"
-          className="w-full py-4 rounded-2xl font-bold text-lg font-heading text-center glow-primary transition-all active:scale-95 flex items-center justify-center gap-2"
-          style={{ background: 'var(--primary)', color: '#fff' }}
+          className="w-full py-4 rounded-2xl font-bold text-lg font-heading text-center glow-primary transition-all active:scale-95"
+          style={{ background: 'var(--primary)', color: '#fff', display: 'block' }}
         >
-          Play Now
-          <ArrowRight size={20} />
+          Play Now →
         </Link>
       </div>
     </GameLayout>

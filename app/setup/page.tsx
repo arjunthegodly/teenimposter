@@ -39,6 +39,7 @@ export default function SetupPage() {
   const [speedDuration, setSpeedDuration] = useState(15)
   const [timerEnabled, setTimerEnabled] = useState(false)
   const [timerDuration, setTimerDuration] = useState(60)
+  const [lastStand, setLastStand] = useState(false)
 
   const addPlayer = () => {
     const trimmed = playerInput.trim()
@@ -96,6 +97,7 @@ export default function SetupPage() {
       imposterHint: gameMode === 'question' ? 'pairedWord' : imposterHint,
       speedRound: { enabled: speedEnabled, duration: speedDuration },
       timer: { enabled: timerEnabled, duration: timerDuration },
+      lastStand,
     }
     setConfig(cfg)
     startRound(cfg)
@@ -593,6 +595,30 @@ export default function SetupPage() {
               </div>
             )}
 
+            {/* Last Stand */}
+            <div className="card p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-bold font-heading text-sm" style={{ color: 'var(--foreground)' }}>
+                    ⚖️ Last Stand
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+                    Voted-out player gets 10 seconds to defend themselves before the reveal
+                  </p>
+                </div>
+                <button
+                  onClick={() => setLastStand(e => !e)}
+                  className="w-12 h-6 rounded-full relative transition-colors"
+                  style={{ background: lastStand ? 'var(--primary)' : 'var(--card-border)' }}
+                >
+                  <div
+                    className="absolute top-1 w-4 h-4 rounded-full bg-white transition-transform"
+                    style={{ left: lastStand ? '26px' : '4px' }}
+                  />
+                </button>
+              </div>
+            </div>
+
             {/* Speed round */}
             <div className="card p-5 flex flex-col gap-4">
               <div className="flex items-center justify-between">
@@ -749,6 +775,12 @@ export default function SetupPage() {
                 <div className="flex justify-between text-sm">
                   <span style={{ color: 'var(--muted)' }}>Speed round</span>
                   <span style={{ color: 'var(--secondary)' }}>⚡ {speedDuration}s per player</span>
+                </div>
+              )}
+              {lastStand && (
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: 'var(--muted)' }}>Last Stand</span>
+                  <span style={{ color: 'var(--primary)' }}>⚖️ On</span>
                 </div>
               )}
             </div>

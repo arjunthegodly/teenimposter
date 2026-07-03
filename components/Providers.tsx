@@ -46,6 +46,7 @@ interface GameContextType {
   usedWordIds: string[]
   usedQuestionIds: string[]
   wordsExhausted: boolean
+  sessionScores: Record<string, number>
   setConfig: (config: GameConfig) => void
   startRound: (overrideConfig?: GameConfig) => void
   advanceReveal: () => void
@@ -102,6 +103,7 @@ export function Providers({ children }: { children: ReactNode }) {
   const [round, setRound] = useState<RoundState | null>(null)
   const [usedWordIds, setUsedWordIds] = useState<string[]>([])
   const [usedQuestionIds, setUsedQuestionIds] = useState<string[]>([])
+  const [sessionScores, setSessionScores] = useState<Record<string, number>>({})
 
   const setConfig = useCallback((cfg: GameConfig) => {
     setConfigState(cfg)
@@ -219,9 +221,37 @@ export function Providers({ children }: { children: ReactNode }) {
   }, [])
 
   const proceedToResults = useCallback((finalVotes: Record<string, string>) => {
+    if (!round || !config) return
+
+    // Update session scores
+    const tally = tallyVotes(finalVotes)
+    const eligible = round.tiedPlayers.length > 0 ? round.tiedPlayers : config.players
+    const votedOut = getVotedOut(tally, eligible)
+    const votedOutIsImposter = votedOut ? round.imposters.includes(votedOut) : false
+    const allImposters = round.imposters.length === config.players.length
+
+    setSessionScores(prev => {
+      const next = { ...prev }
+      if (allImposters) {
+        config.players.forEach(p => { next[p] = (next[p] ?? 0) + 1 })
+      } else if (votedOutIsImposter) {
+        config.players.forEach(p => {
+          if (!round.imposters.includes(p)) next[p] = (next[p] ?? 0) + 1
+        })
+      } else {
+        round.imposters.forEach(p => { next[p] = (next[p] ?? 0) + 1 })
+      }
+      return next
+    })
+
     setRound(prev => prev ? { ...prev, phase: 'results', votes: finalVotes } : prev)
-    router.push('/results')
-  }, [router])
+
+    if (config.lastStand && votedOut) {
+      router.push('/last-stand')
+    } else {
+      router.push('/results')
+    }
+  }, [round, config, router])
 
   const resetUsedWords = useCallback(() => {
     setUsedWordIds([])
@@ -232,6 +262,7 @@ export function Providers({ children }: { children: ReactNode }) {
     setRound(null)
     setUsedWordIds([])
     setUsedQuestionIds([])
+    setSessionScores({})
   }, [])
 
   // Derived: pool exhausted
@@ -252,6 +283,7 @@ export function Providers({ children }: { children: ReactNode }) {
           usedWordIds,
           usedQuestionIds,
           wordsExhausted,
+          sessionScores,
           setConfig,
           startRound,
           advanceReveal,
