@@ -17,7 +17,7 @@ export default function ResultsPage() {
     if (!config || !round) router.replace('/')
   }, [config, round, router])
 
-  if (!config || !round) return null
+  if (!config || !round || round.phase !== 'results') return null
 
   const tally = tallyVotes(round.votes)
   const votedOut = getVotedOut(tally, round.tiedPlayers.length > 0 ? round.tiedPlayers : config.players)
@@ -184,7 +184,7 @@ export default function ResultsPage() {
               style={{ background: 'var(--card)', border: '1px solid var(--card-border)', color: 'var(--foreground)' }}
             >
               <RotateCcw size={16} />
-              All words used — reshuffle
+              {isQuestionMode ? 'All questions used — reshuffle' : 'All words used — reshuffle'}
             </button>
           ) : (
             <button
@@ -192,7 +192,7 @@ export default function ResultsPage() {
               className="w-full py-4 rounded-2xl font-bold text-lg font-heading glow-primary transition-all active:scale-95 flex items-center justify-center gap-2"
               style={{ background: 'var(--primary)', color: '#fff' }}
             >
-              Play Again
+              Next Round
               <ArrowRight size={20} />
             </button>
           )}

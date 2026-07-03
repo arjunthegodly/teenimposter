@@ -8,6 +8,9 @@ export const themes: ThemeConfig[] = [
   { id: 'sunset-vibe',     label: 'Sunset Vibe',     swatch: '#FF6B9D' },
   { id: 'ocean-deep',      label: 'Ocean Deep',      swatch: '#00D4FF' },
   { id: 'candy-pop',       label: 'Candy Pop',       swatch: '#E91E8C' },
+  { id: 'rose-gold',       label: 'Rose Gold',       swatch: '#C97060' },
+  { id: 'dark-academia',   label: 'Dark Academia',   swatch: '#C8973A' },
+  { id: 'cyber-pulse',     label: 'Cyber Pulse',     swatch: '#00C8FF' },
 ]
 
 export const defaultTheme: ThemeId = 'dark-neon'

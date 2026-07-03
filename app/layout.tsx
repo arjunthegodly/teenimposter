@@ -10,6 +10,9 @@ import {
   Exo_2,
   DM_Sans,
   Fredoka,
+  Playfair_Display,
+  Orbitron,
+  Outfit,
 } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/Providers'
@@ -29,6 +32,9 @@ const raleway = Raleway({ variable: '--font-raleway', subsets: ['latin'] })
 const exo2 = Exo_2({ variable: '--font-exo2', subsets: ['latin'] })
 const dmSans = DM_Sans({ variable: '--font-dm-sans', subsets: ['latin'] })
 const fredoka = Fredoka({ variable: '--font-fredoka', subsets: ['latin'] })
+const playfair = Playfair_Display({ variable: '--font-playfair', subsets: ['latin'] })
+const orbitron = Orbitron({ variable: '--font-orbitron', subsets: ['latin'] })
+const outfit = Outfit({ variable: '--font-outfit', subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'TeenImposter',
@@ -60,6 +66,9 @@ const fontVars = [
   exo2.variable,
   dmSans.variable,
   fredoka.variable,
+  playfair.variable,
+  orbitron.variable,
+  outfit.variable,
 ].join(' ')
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -7,9 +7,10 @@ interface VoteGridProps {
   players: string[]
   voter: string
   onVote: (votedFor: string) => void
+  gameMode?: 'word' | 'question'
 }
 
-export function VoteGrid({ players, voter, onVote }: VoteGridProps) {
+export function VoteGrid({ players, voter, onVote, gameMode = 'word' }: VoteGridProps) {
   const [selected, setSelected] = useState<string | null>(null)
   const eligible = players.filter(p => p !== voter)
 
@@ -24,7 +25,11 @@ export function VoteGrid({ players, voter, onVote }: VoteGridProps) {
         <h3 className="text-2xl font-bold font-heading" style={{ color: 'var(--primary)' }}>
           {voter}
         </h3>
-        <p className="text-sm mt-2" style={{ color: 'var(--muted)' }}>Who&apos;s the imposter?</p>
+        <p className="text-sm mt-2" style={{ color: 'var(--muted)' }}>
+          {gameMode === 'question'
+            ? "Who had a different question?"
+            : "Who's the imposter?"}
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -38,7 +43,7 @@ export function VoteGrid({ players, voter, onVote }: VoteGridProps) {
               background: selected === p ? 'var(--primary)' : 'var(--card)',
               border: `2px solid ${selected === p ? 'var(--primary)' : 'var(--card-border)'}`,
               color: selected === p ? '#fff' : 'var(--foreground)',
-              boxShadow: selected === p ? '0 0 20px rgba(139,92,246,0.4)' : 'none',
+              boxShadow: selected === p ? `0 0 20px color-mix(in srgb, var(--primary) 40%, transparent)` : 'none',
             }}
           >
             {p}

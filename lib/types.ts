@@ -1,4 +1,4 @@
-export type ThemeId = 'dark-neon' | 'gradient-glass' | 'bold-bright' | 'retro-y2k' | 'sunset-vibe' | 'ocean-deep' | 'candy-pop'
+export type ThemeId = 'dark-neon' | 'gradient-glass' | 'bold-bright' | 'retro-y2k' | 'sunset-vibe' | 'ocean-deep' | 'candy-pop' | 'rose-gold' | 'dark-academia' | 'cyber-pulse'
 export type ImposterHint = 'category' | 'pairedWord' | 'hint' | 'nothing'
 export type GameMode = 'word' | 'question'
 

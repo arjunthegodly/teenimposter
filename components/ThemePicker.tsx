@@ -41,10 +41,11 @@ export function ThemePicker() {
 
       {open && (
         <div
-          className="absolute top-11 right-0 p-2 flex flex-col gap-0.5 w-48 rounded-2xl shadow-2xl"
+          className="absolute top-11 right-0 p-2 flex flex-col gap-0.5 w-52 rounded-2xl shadow-2xl overflow-y-auto"
           style={{
             background: 'var(--card)',
             border: '1px solid var(--card-border)',
+            maxHeight: 'calc(100dvh - 80px)',
           }}
         >
           <p className="text-xs px-3 pt-1 pb-2 font-medium uppercase tracking-widest" style={{ color: 'var(--muted)' }}>

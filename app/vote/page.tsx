@@ -78,7 +78,11 @@ export default function VotePage() {
               Votes are in
             </h2>
             <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
-              {votedOut ? `${votedOut} is out` : 'It\'s a tie — but not revoting'}
+              {votedOut
+                ? `${votedOut} is out`
+                : config.gameMode === 'question'
+                ? 'Everyone had the same question?'
+                : 'Nobody caught — no clear winner'}
             </p>
           </div>
 
@@ -147,7 +151,7 @@ export default function VotePage() {
             className="w-full py-4 rounded-2xl font-bold text-lg font-heading glow-primary transition-all active:scale-95 flex items-center justify-center gap-2"
             style={{ background: 'var(--primary)', color: '#fff' }}
           >
-            Reveal Imposter
+            {config.gameMode === 'question' ? 'Reveal Questions' : 'Reveal Imposter'}
             <ArrowRight size={20} />
           </button>
         </motion.div>
@@ -211,6 +215,7 @@ export default function VotePage() {
                 players={isLocalRevote ? localTied : config.players}
                 voter={currentVoter}
                 onVote={handleVote}
+                gameMode={config.gameMode}
               />
             </motion.div>
           )}

@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   type ReactNode,
 } from 'react'
 import { useRouter } from 'next/navigation'
@@ -234,15 +235,13 @@ export function Providers({ children }: { children: ReactNode }) {
   }, [])
 
   // Derived: pool exhausted
-  const wordsExhausted = (() => {
+  const wordsExhausted = useMemo(() => {
     if (!config) return false
     if (config.gameMode === 'question') {
-      const drawn = drawQuestion(allQuestionSubcategories, config.selectedSubcategories, usedQuestionIds)
-      return drawn === null
+      return drawQuestion(allQuestionSubcategories, config.selectedSubcategories, usedQuestionIds) === null
     }
-    const drawn = drawWord(allSubcategories, config.selectedSubcategories, usedWordIds, config.customWords)
-    return drawn === null
-  })()
+    return drawWord(allSubcategories, config.selectedSubcategories, usedWordIds, config.customWords) === null
+  }, [config, usedQuestionIds, usedWordIds])
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, sound, toggleSound }}>

@@ -134,6 +134,57 @@
 }
 
 /* ─────────────────────────────────────────────────
+   ROSE GOLD
+   Warm cream + dusty rose + antique gold
+───────────────────────────────────────────────── */
+[data-theme="rose-gold"] {
+  --surface: #FDF5F0;
+  --card: #FFFFFF;
+  --card-border: rgba(201, 112, 96, 0.2);
+  --primary: #C97060;
+  --secondary: #B8860B;
+  --accent: #E8B4A0;
+  --foreground: #2C1A15;
+  --muted: #8A6458;
+  --font-heading-family: var(--font-playfair, serif);
+  --font-body-family: var(--font-outfit, sans-serif);
+}
+
+/* ─────────────────────────────────────────────────
+   DARK ACADEMIA
+   Deep warm brown + amber gold + parchment
+───────────────────────────────────────────────── */
+[data-theme="dark-academia"] {
+  --surface: #1A1208;
+  --card: #241A0E;
+  --card-border: rgba(200, 151, 58, 0.22);
+  --primary: #C8973A;
+  --secondary: #A67C52;
+  --accent: #8B6914;
+  --foreground: #E8D8B8;
+  --muted: #907858;
+  --font-heading-family: var(--font-playfair, serif);
+  --font-body-family: var(--font-outfit, sans-serif);
+}
+
+/* ─────────────────────────────────────────────────
+   CYBER PULSE
+   Deep navy black + electric cyan + hot magenta
+───────────────────────────────────────────────── */
+[data-theme="cyber-pulse"] {
+  --surface: #000A18;
+  --card: #001428;
+  --card-border: rgba(0, 200, 255, 0.18);
+  --primary: #00C8FF;
+  --secondary: #FF00CC;
+  --accent: #00FFAA;
+  --foreground: #E0F8FF;
+  --muted: #4A8AA8;
+  --font-heading-family: var(--font-orbitron, sans-serif);
+  --font-body-family: var(--font-outfit, sans-serif);
+}
+
+/* ─────────────────────────────────────────────────
    BASE STYLES
 ───────────────────────────────────────────────── */
 html {
@@ -175,6 +226,24 @@ html[data-theme="candy-pop"] body {
 
 html[data-theme="bold-bright"] body {
   background: linear-gradient(160deg, #FFFFFF 0%, #F0F4FF 100%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+html[data-theme="rose-gold"] body {
+  background: linear-gradient(135deg, #FDF5F0 0%, #F8EDE8 50%, #FDF0E8 100%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+html[data-theme="dark-academia"] body {
+  background: linear-gradient(160deg, #1A1208 0%, #201608 50%, #1C1408 100%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+html[data-theme="cyber-pulse"] body {
+  background: radial-gradient(ellipse at top, #001830 0%, #000A18 60%);
   background-attachment: fixed;
   min-height: 100dvh;
 }
@@ -239,10 +308,44 @@ html[data-theme="candy-pop"] .glow-primary {
   box-shadow: 0 0 20px rgba(233, 30, 140, 0.35), 0 0 40px rgba(233, 30, 140, 0.1);
 }
 
+/* Glow: bold bright */
+html[data-theme="bold-bright"] .glow-primary {
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.4), 0 0 40px rgba(249, 115, 22, 0.15);
+}
+
 /* Card shadows for light themes */
 html[data-theme="bold-bright"] .card,
-html[data-theme="candy-pop"] .card {
+html[data-theme="candy-pop"] .card,
+html[data-theme="rose-gold"] .card {
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+}
+
+/* Glow: rose gold */
+html[data-theme="rose-gold"] .glow-primary {
+  box-shadow: 0 0 20px rgba(201, 112, 96, 0.4), 0 0 40px rgba(201, 112, 96, 0.15);
+}
+
+/* Glow: dark academia */
+html[data-theme="dark-academia"] .glow-primary {
+  box-shadow: 0 0 24px rgba(200, 151, 58, 0.5), 0 0 48px rgba(200, 151, 58, 0.2);
+}
+
+/* Glow: cyber pulse */
+html[data-theme="cyber-pulse"] .glow-primary {
+  box-shadow: 0 0 28px rgba(0, 200, 255, 0.65), 0 0 56px rgba(0, 200, 255, 0.25);
+}
+
+/* Cyber pulse grid overlay */
+html[data-theme="cyber-pulse"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 200, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 200, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Smooth theme transitions */
