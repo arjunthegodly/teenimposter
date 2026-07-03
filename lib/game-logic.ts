@@ -1,4 +1,4 @@
-import { SubCategoryData, WordEntry } from './types'
+import { QuestionSubCategoryData, SubCategoryData, WordEntry, QuestionEntry } from './types'
 
 export function assignImposters(players: string[], range: [number, number]): string[] {
   const [min, max] = range
@@ -42,6 +42,34 @@ export function drawWord(
           subcategoryId: sub.id,
           subcategoryName: sub.name,
         })
+      }
+    }
+  }
+
+  if (pool.length === 0) return null
+
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+interface DrawnQuestion {
+  entry: QuestionEntry
+  subcategoryId: string
+  subcategoryName: string
+}
+
+export function drawQuestion(
+  subcategories: QuestionSubCategoryData[],
+  selectedIds: string[],
+  usedQuestionIds: string[]
+): DrawnQuestion | null {
+  const pool: DrawnQuestion[] = []
+
+  for (const sub of subcategories) {
+    if (!selectedIds.includes(sub.id)) continue
+
+    for (const q of sub.questions) {
+      if (!usedQuestionIds.includes(q.id)) {
+        pool.push({ entry: q, subcategoryId: sub.id, subcategoryName: sub.name })
       }
     }
   }

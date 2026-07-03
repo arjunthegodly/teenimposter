@@ -18,6 +18,7 @@ export default function GamePage() {
 
   if (!config || !round || round.phase !== 'clue') return null
 
+  const isQuestionMode = config.gameMode === 'question'
   const isSpeedRound = config.speedRound.enabled
   const speedDuration = config.speedRound.duration
   const hasOverallTimer = config.timer.enabled
@@ -37,14 +38,29 @@ export default function GamePage() {
             className="text-3xl font-extrabold font-heading"
             style={{ color: 'var(--foreground)' }}
           >
-            Give your clues
+            {isQuestionMode ? 'Share your answers' : 'Give your clues'}
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
             {isSpeedRound
               ? `⚡ Speed round — ${speedDuration}s per player`
+              : isQuestionMode
+              ? 'Take turns sharing your answer — try to sound like everyone else'
               : 'One clue each, no repeating what others said'}
           </p>
         </div>
+
+        {/* Question mode reminder */}
+        {isQuestionMode && (
+          <div
+            className="card px-4 py-3 flex gap-2 items-center"
+            style={{ borderColor: 'var(--primary)' }}
+          >
+            <span style={{ color: 'var(--primary)', fontSize: '16px' }}>🕵️</span>
+            <p className="text-sm" style={{ color: 'var(--muted)' }}>
+              Someone answered a different question — find out who sounds off
+            </p>
+          </div>
+        )}
 
         {/* Overall timer */}
         {hasOverallTimer && !isSpeedRound && (
@@ -86,7 +102,7 @@ export default function GamePage() {
         <div className="card overflow-hidden">
           <div className="px-4 pt-4 pb-2">
             <p className="text-xs uppercase tracking-widest font-semibold" style={{ color: 'var(--muted)' }}>
-              Player order
+              {isQuestionMode ? 'Answer order' : 'Player order'}
             </p>
           </div>
           <div className="flex flex-col px-2 pb-2">

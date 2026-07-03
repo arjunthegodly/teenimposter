@@ -1,11 +1,18 @@
 export type ThemeId = 'dark-neon' | 'gradient-glass' | 'bold-bright' | 'retro-y2k' | 'sunset-vibe' | 'ocean-deep' | 'candy-pop'
 export type ImposterHint = 'category' | 'pairedWord' | 'hint' | 'nothing'
+export type GameMode = 'word' | 'question'
 
 export interface WordEntry {
   id: string
   word: string
   paired?: string
   hint?: string
+}
+
+export interface QuestionEntry {
+  id: string
+  question: string
+  imposterQuestion: string
 }
 
 export interface SubCategoryData {
@@ -15,14 +22,22 @@ export interface SubCategoryData {
   words: WordEntry[]
 }
 
+export interface QuestionSubCategoryData {
+  id: string
+  name: string
+  category: string
+  questions: QuestionEntry[]
+}
+
 export interface CategoryGroup {
   id: string
   name: string
-  subcategories: SubCategoryData[]
+  subcategories: SubCategoryData[] | QuestionSubCategoryData[]
 }
 
 export interface GameConfig {
   players: string[]
+  gameMode: GameMode
   selectedSubcategories: string[]
   customWords: Record<string, string[]>
   imposterRange: [number, number]
@@ -50,6 +65,7 @@ export interface GameState {
   config: GameConfig | null
   round: RoundState | null
   usedWordIds: string[]
+  usedQuestionIds: string[]
   theme: ThemeId
   sound: boolean
 }

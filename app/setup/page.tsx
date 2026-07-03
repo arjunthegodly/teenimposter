@@ -4,14 +4,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Plus, Minus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Plus, Minus, MessageSquare, Type } from 'lucide-react'
 import { useGame } from '@/components/Providers'
 import { ChipInput } from '@/components/ChipInput'
 import { GameLayout } from '@/components/GameLayout'
 import { categoryGroups, defaultSelectedSubcategories } from '@/data/categories/index'
-import { GameConfig, ImposterHint } from '@/lib/types'
+import { GameConfig, GameMode, ImposterHint } from '@/lib/types'
 
-const STEP_LABELS = ['Players', 'Categories', 'Modes', 'Timer']
+const STEP_LABELS = ['Players', 'Mode', 'Categories', 'Modes', 'Timer']
 
 const HINT_OPTIONS: { value: ImposterHint; label: string; desc: string }[] = [
   { value: 'category', label: 'Category', desc: 'Imposter sees the category name' },
@@ -27,6 +27,7 @@ export default function SetupPage() {
   const [step, setStep] = useState(0)
   const [players, setPlayers] = useState<string[]>([])
   const [playerInput, setPlayerInput] = useState('')
+  const [gameMode, setGameMode] = useState<GameMode>('word')
   const [selectedSubs, setSelectedSubs] = useState<string[]>(defaultSelectedSubcategories)
   const [expandedGroups, setExpandedGroups] = useState<string[]>([])
   const [customWords, setCustomWords] = useState<Record<string, string[]>>({})
@@ -39,7 +40,6 @@ export default function SetupPage() {
   const [timerEnabled, setTimerEnabled] = useState(false)
   const [timerDuration, setTimerDuration] = useState(60)
 
-  // ── Player name helpers ──
   const addPlayer = () => {
     const trimmed = playerInput.trim()
     if (!trimmed || players.includes(trimmed)) return
@@ -49,7 +49,6 @@ export default function SetupPage() {
 
   const removePlayer = (name: string) => setPlayers(p => p.filter(x => x !== name))
 
-  // ── Category helpers ──
   const toggleSub = (id: string) => {
     setSelectedSubs(prev =>
       prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
@@ -74,12 +73,12 @@ export default function SetupPage() {
     )
   }
 
-  // ── Validation ──
   const canProceed = [
-    players.length >= 3,
-    selectedSubs.length >= 1,
-    true,
-    true,
+    players.length >= 3,   // 0: Players
+    true,                   // 1: Mode
+    selectedSubs.length >= 1, // 2: Categories
+    true,                   // 3: Modes
+    true,                   // 4: Timer
   ][step]
 
   const clampMin = (v: number) => Math.max(1, Math.min(v, imposterMax))
@@ -90,10 +89,11 @@ export default function SetupPage() {
 
     const cfg: GameConfig = {
       players,
+      gameMode,
       selectedSubcategories: selectedSubs,
       customWords,
       imposterRange: [imposterMin, imposterMax],
-      imposterHint,
+      imposterHint: gameMode === 'question' ? 'pairedWord' : imposterHint,
       speedRound: { enabled: speedEnabled, duration: speedDuration },
       timer: { enabled: timerEnabled, duration: timerDuration },
     }
@@ -104,12 +104,12 @@ export default function SetupPage() {
   return (
     <GameLayout>
       {/* Step indicator */}
-      <div className="flex gap-2 items-center mb-6">
-        <Link href="/" className="mr-2" style={{ color: 'var(--muted)' }}>
+      <div className="flex gap-1.5 items-center mb-6 overflow-x-auto pb-1">
+        <Link href="/" className="mr-1 flex-shrink-0" style={{ color: 'var(--muted)' }}>
           <ChevronLeft size={20} />
         </Link>
         {STEP_LABELS.map((label, i) => (
-          <div key={label} className="flex items-center gap-2">
+          <div key={label} className="flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={() => i < step && setStep(i)}
               className="flex items-center gap-1"
@@ -131,13 +131,14 @@ export default function SetupPage() {
               </span>
             </button>
             {i < STEP_LABELS.length - 1 && (
-              <div className="w-4 h-px" style={{ background: 'var(--card-border)' }} />
+              <div className="w-3 h-px flex-shrink-0" style={{ background: 'var(--card-border)' }} />
             )}
           </div>
         ))}
       </div>
 
       <AnimatePresence mode="wait">
+
         {/* ── Step 0: Players ── */}
         {step === 0 && (
           <motion.div
@@ -211,10 +212,154 @@ export default function SetupPage() {
           </motion.div>
         )}
 
-        {/* ── Step 1: Categories ── */}
+        {/* ── Step 1: Game Mode ── */}
         {step === 1 && (
           <motion.div
             key="step1"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="flex flex-col gap-5"
+          >
+            <div>
+              <h2 className="text-2xl font-bold font-heading" style={{ color: 'var(--foreground)' }}>
+                How do you want to play?
+              </h2>
+              <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
+                Choose your game mode
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {/* Word Mode */}
+              <button
+                onClick={() => setGameMode('word')}
+                className="card p-5 text-left transition-all active:scale-[0.99]"
+                style={{
+                  borderColor: gameMode === 'word' ? 'var(--primary)' : 'var(--card-border)',
+                  borderWidth: '2px',
+                }}
+              >
+                <div className="flex items-start gap-4">
+                  <div
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: gameMode === 'word' ? 'var(--primary)' : 'var(--card-border)' }}
+                  >
+                    <Type size={20} style={{ color: gameMode === 'word' ? '#fff' : 'var(--muted)' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold font-heading text-base" style={{ color: 'var(--foreground)' }}>
+                        Word Mode
+                      </p>
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                        style={{ background: 'var(--secondary)', color: '#fff' }}
+                      >
+                        Classic
+                      </span>
+                    </div>
+                    <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--muted)' }}>
+                      Each player gets a secret word. Give one-word clues. The imposter doesn&apos;t know the word — they have to blend in.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {['One-word clues', 'Fast rounds', 'Strategic'].map(tag => (
+                        <span
+                          key={tag}
+                          className="text-xs px-2 py-0.5 rounded-full"
+                          style={{ background: 'var(--card-border)', color: 'var(--muted)' }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div
+                    className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ borderColor: gameMode === 'word' ? 'var(--primary)' : 'var(--card-border)' }}
+                  >
+                    {gameMode === 'word' && (
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--primary)' }} />
+                    )}
+                  </div>
+                </div>
+              </button>
+
+              {/* Question Mode */}
+              <button
+                onClick={() => setGameMode('question')}
+                className="card p-5 text-left transition-all active:scale-[0.99]"
+                style={{
+                  borderColor: gameMode === 'question' ? 'var(--primary)' : 'var(--card-border)',
+                  borderWidth: '2px',
+                }}
+              >
+                <div className="flex items-start gap-4">
+                  <div
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: gameMode === 'question' ? 'var(--primary)' : 'var(--card-border)' }}
+                  >
+                    <MessageSquare size={20} style={{ color: gameMode === 'question' ? '#fff' : 'var(--muted)' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold font-heading text-base" style={{ color: 'var(--foreground)' }}>
+                        Question Mode
+                      </p>
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                        style={{ background: 'var(--primary)', color: '#fff' }}
+                      >
+                        New
+                      </span>
+                    </div>
+                    <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--muted)' }}>
+                      Everyone gets a question to answer out loud. The imposter secretly gets a <em>different</em> question — and has no idea they&apos;re the imposter.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {['Blind imposter', 'Story-based', 'Social'].map(tag => (
+                        <span
+                          key={tag}
+                          className="text-xs px-2 py-0.5 rounded-full"
+                          style={{ background: 'var(--card-border)', color: 'var(--muted)' }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div
+                    className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ borderColor: gameMode === 'question' ? 'var(--primary)' : 'var(--card-border)' }}
+                  >
+                    {gameMode === 'question' && (
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--primary)' }} />
+                    )}
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            {gameMode === 'question' && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="card px-4 py-3 flex gap-3 items-start"
+                style={{ borderColor: 'var(--secondary)' }}
+              >
+                <span className="text-lg mt-0.5">💡</span>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
+                  The imposter gets a slightly different question about the same topic. They answer it honestly — but their answer sounds subtly off to everyone else.
+                </p>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* ── Step 2: Categories ── */}
+        {step === 2 && (
+          <motion.div
+            key="step2"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -237,7 +382,6 @@ export default function SetupPage() {
 
               return (
                 <div key={group.id} className="card overflow-hidden">
-                  {/* Group header */}
                   <div className="flex items-center justify-between p-4">
                     <button
                       onClick={() => toggleGroupAll(group.id)}
@@ -264,7 +408,6 @@ export default function SetupPage() {
                     </button>
                   </div>
 
-                  {/* Subcategory list */}
                   {isExpanded && (
                     <div className="px-4 pb-4 flex flex-col gap-2" style={{ borderTop: '1px solid var(--card-border)' }}>
                       {group.subcategories.map(sub => {
@@ -294,18 +437,20 @@ export default function SetupPage() {
                                   </span>
                                 )}
                               </button>
-                              <button
-                                onClick={() => setExpandedCustom(isCustomOpen ? null : sub.id)}
-                                className="text-xs px-2 py-1 rounded-lg transition-all"
-                                style={{
-                                  background: 'var(--card-border)',
-                                  color: 'var(--muted)',
-                                }}
-                              >
-                                + words
-                              </button>
+                              {gameMode === 'word' && (
+                                <button
+                                  onClick={() => setExpandedCustom(isCustomOpen ? null : sub.id)}
+                                  className="text-xs px-2 py-1 rounded-lg transition-all"
+                                  style={{
+                                    background: 'var(--card-border)',
+                                    color: 'var(--muted)',
+                                  }}
+                                >
+                                  + words
+                                </button>
+                              )}
                             </div>
-                            {isCustomOpen && (
+                            {isCustomOpen && gameMode === 'word' && (
                               <div className="pl-6">
                                 <ChipInput
                                   values={customWords[sub.id] ?? []}
@@ -325,10 +470,10 @@ export default function SetupPage() {
           </motion.div>
         )}
 
-        {/* ── Step 2: Modes ── */}
-        {step === 2 && (
+        {/* ── Step 3: Modes ── */}
+        {step === 3 && (
           <motion.div
-            key="step2"
+            key="step3"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -404,32 +549,49 @@ export default function SetupPage() {
               </p>
             </div>
 
-            {/* Imposter hint */}
-            <div className="card p-5 flex flex-col gap-3">
-              <p className="font-bold font-heading text-sm" style={{ color: 'var(--foreground)' }}>
-                What does the imposter see?
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {HINT_OPTIONS.map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setImposterHint(opt.value)}
-                    className="p-3 rounded-xl text-left transition-all active:scale-95"
-                    style={{
-                      background: imposterHint === opt.value ? 'var(--primary)' : 'var(--card-border)',
-                      border: `1px solid ${imposterHint === opt.value ? 'var(--primary)' : 'transparent'}`,
-                    }}
-                  >
-                    <p className="text-sm font-bold" style={{ color: imposterHint === opt.value ? '#fff' : 'var(--foreground)' }}>
-                      {opt.label}
-                    </p>
-                    <p className="text-xs mt-0.5" style={{ color: imposterHint === opt.value ? 'rgba(255,255,255,0.75)' : 'var(--muted)' }}>
-                      {opt.desc}
-                    </p>
-                  </button>
-                ))}
+            {/* Imposter hint — word mode only */}
+            {gameMode === 'word' && (
+              <div className="card p-5 flex flex-col gap-3">
+                <p className="font-bold font-heading text-sm" style={{ color: 'var(--foreground)' }}>
+                  What does the imposter see?
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {HINT_OPTIONS.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setImposterHint(opt.value)}
+                      className="p-3 rounded-xl text-left transition-all active:scale-95"
+                      style={{
+                        background: imposterHint === opt.value ? 'var(--primary)' : 'var(--card-border)',
+                        border: `1px solid ${imposterHint === opt.value ? 'var(--primary)' : 'transparent'}`,
+                      }}
+                    >
+                      <p className="text-sm font-bold" style={{ color: imposterHint === opt.value ? '#fff' : 'var(--foreground)' }}>
+                        {opt.label}
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color: imposterHint === opt.value ? 'rgba(255,255,255,0.75)' : 'var(--muted)' }}>
+                        {opt.desc}
+                      </p>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Question mode info */}
+            {gameMode === 'question' && (
+              <div className="card p-4 flex gap-3 items-start" style={{ borderColor: 'var(--secondary)' }}>
+                <span className="text-lg">🕵️</span>
+                <div>
+                  <p className="font-bold text-sm font-heading" style={{ color: 'var(--foreground)' }}>
+                    Blind imposter
+                  </p>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
+                    In Question Mode, the imposter doesn&apos;t know they&apos;re the imposter. They get a different question and think everyone answered the same one.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Speed round */}
             <div className="card p-5 flex flex-col gap-4">
@@ -439,7 +601,9 @@ export default function SetupPage() {
                     ⚡ Speed Round
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
-                    Each player has limited time to give a clue
+                    {gameMode === 'question'
+                      ? 'Each player has limited time to share their answer'
+                      : 'Each player has limited time to give a clue'}
                   </p>
                 </div>
                 <button
@@ -481,10 +645,10 @@ export default function SetupPage() {
           </motion.div>
         )}
 
-        {/* ── Step 3: Timer ── */}
-        {step === 3 && (
+        {/* ── Step 4: Timer ── */}
+        {step === 4 && (
           <motion.div
-            key="step3"
+            key="step4"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -495,7 +659,7 @@ export default function SetupPage() {
                 Overall timer
               </h2>
               <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
-                Optional countdown for the whole clue phase
+                Optional countdown for the whole {gameMode === 'question' ? 'answer' : 'clue'} phase
               </p>
             </div>
 
@@ -506,7 +670,9 @@ export default function SetupPage() {
                     Round timer
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
-                    Clue phase ends automatically when timer runs out
+                    {gameMode === 'question'
+                      ? 'Answer phase ends automatically when timer runs out'
+                      : 'Clue phase ends automatically when timer runs out'}
                   </p>
                 </div>
                 <button
@@ -556,6 +722,12 @@ export default function SetupPage() {
                 <span style={{ color: 'var(--foreground)' }}>{players.join(', ')}</span>
               </div>
               <div className="flex justify-between text-sm">
+                <span style={{ color: 'var(--muted)' }}>Mode</span>
+                <span style={{ color: gameMode === 'question' ? 'var(--primary)' : 'var(--foreground)' }}>
+                  {gameMode === 'question' ? '🕵️ Question Mode' : '💬 Word Mode'}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
                 <span style={{ color: 'var(--muted)' }}>Categories</span>
                 <span style={{ color: 'var(--foreground)' }}>{selectedSubs.length} selected</span>
               </div>
@@ -565,12 +737,14 @@ export default function SetupPage() {
                   {imposterMin === imposterMax ? imposterMin : `${imposterMin}–${imposterMax}`} (random)
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span style={{ color: 'var(--muted)' }}>Imposter sees</span>
-                <span style={{ color: 'var(--foreground)' }}>
-                  {HINT_OPTIONS.find(o => o.value === imposterHint)?.label}
-                </span>
-              </div>
+              {gameMode === 'word' && (
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: 'var(--muted)' }}>Imposter sees</span>
+                  <span style={{ color: 'var(--foreground)' }}>
+                    {HINT_OPTIONS.find(o => o.value === imposterHint)?.label}
+                  </span>
+                </div>
+              )}
               {speedEnabled && (
                 <div className="flex justify-between text-sm">
                   <span style={{ color: 'var(--muted)' }}>Speed round</span>
@@ -595,7 +769,7 @@ export default function SetupPage() {
           </button>
         )}
 
-        {step < 3 ? (
+        {step < 4 ? (
           <button
             onClick={() => setStep(s => s + 1)}
             disabled={!canProceed}

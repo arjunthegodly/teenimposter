@@ -7,7 +7,7 @@ import { useGame } from '@/components/Providers'
 import { CardFlip } from '@/components/CardFlip'
 import { PassScreen } from '@/components/PassScreen'
 import { GameLayout } from '@/components/GameLayout'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, MessageSquare } from 'lucide-react'
 
 export default function RevealPage() {
   const router = useRouter()
@@ -21,6 +21,7 @@ export default function RevealPage() {
 
   if (!config || !round || round.phase !== 'reveal') return null
 
+  const isQuestionMode = config.gameMode === 'question'
   const currentPlayer = config.players[round.revealIndex]
   const isImposter = round.imposters.includes(currentPlayer)
   const isLastPlayer = round.revealIndex === config.players.length - 1
@@ -46,7 +47,10 @@ export default function RevealPage() {
         className="w-16 h-16 rounded-2xl flex items-center justify-center"
         style={{ background: 'var(--card-border)' }}
       >
-        <Eye size={30} style={{ color: 'var(--primary)' }} />
+        {isQuestionMode
+          ? <MessageSquare size={30} style={{ color: 'var(--primary)' }} />
+          : <Eye size={30} style={{ color: 'var(--primary)' }} />
+        }
       </motion.div>
       <div>
         <p className="text-lg font-semibold font-heading" style={{ color: 'var(--foreground)' }}>
@@ -59,11 +63,36 @@ export default function RevealPage() {
     </div>
   )
 
-  const backContent = isImposter ? (
-    <div className="flex flex-col items-center gap-3 text-center w-full">
-      <div
-        className="text-6xl font-extrabold font-heading tracking-widest text-gradient leading-none"
+  // Question mode: everyone sees a question card — imposter's just has a different question
+  // The imposter has NO IDEA they are the imposter
+  const questionModeBack = (
+    <div className="flex flex-col items-center gap-4 text-center w-full">
+      <p
+        className="text-xs uppercase tracking-widest font-semibold"
+        style={{ color: 'var(--muted)' }}
       >
+        {round.subcategoryName}
+      </p>
+      <div
+        className="text-xl font-bold font-heading leading-snug px-2"
+        style={{ color: 'var(--foreground)' }}
+      >
+        {isImposter ? round.pairedWord : round.word}
+      </div>
+      <div
+        className="w-full px-4 py-3 rounded-xl mt-1"
+        style={{ background: 'var(--card-border)' }}
+      >
+        <p className="text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
+          Remember your answer — don&apos;t reveal it yet. Share when it&apos;s your turn.
+        </p>
+      </div>
+    </div>
+  )
+
+  const wordModeBack = isImposter ? (
+    <div className="flex flex-col items-center gap-3 text-center w-full">
+      <div className="text-6xl font-extrabold font-heading tracking-widest text-gradient leading-none">
         IMPOSTER
       </div>
       <div
@@ -121,10 +150,12 @@ export default function RevealPage() {
     </div>
   )
 
+  const backContent = isQuestionMode ? questionModeBack : wordModeBack
+
   return (
     <GameLayout>
       <div className="flex flex-col gap-6">
-        {/* Progress dots */}
+        {/* Progress bar */}
         <div className="flex gap-1.5">
           {config.players.map((_, i) => (
             <div
@@ -141,11 +172,18 @@ export default function RevealPage() {
           ))}
         </div>
 
-        {/* Player counter */}
         <div className="flex items-center justify-between">
           <p className="text-xs uppercase tracking-widest font-medium" style={{ color: 'var(--muted)' }}>
             Player {round.revealIndex + 1} of {config.players.length}
           </p>
+          {isQuestionMode && (
+            <span
+              className="text-xs px-2 py-0.5 rounded-full font-semibold"
+              style={{ background: 'var(--primary)', color: '#fff' }}
+            >
+              Question Mode
+            </span>
+          )}
         </div>
 
         <AnimatePresence mode="wait">
@@ -169,7 +207,9 @@ export default function RevealPage() {
                   {currentPlayer}
                 </p>
                 <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
-                  Cover the screen after reading
+                  {isQuestionMode
+                    ? 'Read your question — keep it secret until your turn'
+                    : 'Cover the screen after reading'}
                 </p>
               </div>
 

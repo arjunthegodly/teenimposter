@@ -23,6 +23,7 @@ export default function ResultsPage() {
   const votedOut = getVotedOut(tally, round.tiedPlayers.length > 0 ? round.tiedPlayers : config.players)
   const votedOutIsImposter = votedOut ? round.imposters.includes(votedOut) : false
   const allImposters = round.imposters.length === config.players.length
+  const isQuestionMode = config.gameMode === 'question'
   const civilianWord = round.word
   const imposterWord = round.pairedWord
   const sortedTally = [...tally.entries()].sort(([, a], [, b]) => b - a)
@@ -86,9 +87,16 @@ export default function ResultsPage() {
               className="text-xs uppercase tracking-widest font-semibold mb-1.5"
               style={{ color: 'var(--muted)' }}
             >
-              {allImposters ? 'The word nobody knew' : 'Civilians had'}
+              {isQuestionMode
+                ? 'Civilian question'
+                : allImposters
+                ? 'The word nobody knew'
+                : 'Civilians had'}
             </p>
-            <p className="text-3xl font-extrabold font-heading" style={{ color: 'var(--secondary)' }}>
+            <p
+              className={isQuestionMode ? 'text-lg font-bold font-heading leading-snug' : 'text-3xl font-extrabold font-heading'}
+              style={{ color: 'var(--secondary)' }}
+            >
               {civilianWord}
             </p>
             <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
@@ -105,9 +113,12 @@ export default function ResultsPage() {
                 className="text-xs uppercase tracking-widest font-semibold mb-1.5"
                 style={{ color: 'var(--muted)' }}
               >
-                Imposters had
+                {isQuestionMode ? 'Imposter question' : 'Imposters had'}
               </p>
-              <p className="text-3xl font-extrabold font-heading" style={{ color: 'var(--primary)' }}>
+              <p
+                className={isQuestionMode ? 'text-lg font-bold font-heading leading-snug' : 'text-3xl font-extrabold font-heading'}
+                style={{ color: 'var(--primary)' }}
+              >
                 {imposterWord}
               </p>
             </div>

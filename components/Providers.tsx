@@ -10,9 +10,10 @@ import {
 } from 'react'
 import { useRouter } from 'next/navigation'
 import { GameConfig, GameState, ImposterHint, RoundState, ThemeId } from '@/lib/types'
-import { assignImposters, drawWord, findTiedPlayers, getVotedOut, tallyVotes } from '@/lib/game-logic'
+import { assignImposters, drawWord, drawQuestion, findTiedPlayers, getVotedOut, tallyVotes } from '@/lib/game-logic'
 import { SOUND_KEY, THEME_KEY, defaultTheme } from '@/lib/theme-config'
 import { allSubcategories } from '@/data/categories/index'
+import { allQuestionSubcategories } from '@/data/questions/index'
 
 /* ─────────────────────────────────────────────
    Theme Context
@@ -42,6 +43,7 @@ interface GameContextType {
   config: GameConfig | null
   round: RoundState | null
   usedWordIds: string[]
+  usedQuestionIds: string[]
   wordsExhausted: boolean
   setConfig: (config: GameConfig) => void
   startRound: (overrideConfig?: GameConfig) => void
@@ -98,6 +100,7 @@ export function Providers({ children }: { children: ReactNode }) {
   const [config, setConfigState] = useState<GameConfig | null>(null)
   const [round, setRound] = useState<RoundState | null>(null)
   const [usedWordIds, setUsedWordIds] = useState<string[]>([])
+  const [usedQuestionIds, setUsedQuestionIds] = useState<string[]>([])
 
   const setConfig = useCallback((cfg: GameConfig) => {
     setConfigState(cfg)
@@ -107,33 +110,54 @@ export function Providers({ children }: { children: ReactNode }) {
     const cfg = overrideConfig ?? config
     if (!cfg) return
 
-    const drawn = drawWord(allSubcategories, cfg.selectedSubcategories, usedWordIds, cfg.customWords)
-    if (!drawn) {
-      // All words exhausted signal handled by wordsExhausted derived state
-      return
-    }
-
     const imposters = assignImposters(cfg.players, cfg.imposterRange)
 
-    const newRound: RoundState = {
-      word: drawn.entry.word,
-      pairedWord: cfg.imposterHint === 'pairedWord' ? drawn.entry.paired : undefined,
-      hint: cfg.imposterHint === 'hint' ? drawn.entry.hint : undefined,
-      subcategoryId: drawn.subcategoryId,
-      subcategoryName: drawn.subcategoryName,
-      imposters,
-      revealIndex: 0,
-      speakerIndex: 0,
-      votes: {},
-      tiedPlayers: [],
-      isRevote: false,
-      phase: 'reveal',
-    }
+    if (cfg.gameMode === 'question') {
+      const drawn = drawQuestion(allQuestionSubcategories, cfg.selectedSubcategories, usedQuestionIds)
+      if (!drawn) return
 
-    setUsedWordIds(prev => [...prev, drawn.entry.id])
-    setRound(newRound)
-    router.push('/reveal')
-  }, [config, usedWordIds, router])
+      const newRound: RoundState = {
+        word: drawn.entry.question,
+        pairedWord: drawn.entry.imposterQuestion,
+        hint: undefined,
+        subcategoryId: drawn.subcategoryId,
+        subcategoryName: drawn.subcategoryName,
+        imposters,
+        revealIndex: 0,
+        speakerIndex: 0,
+        votes: {},
+        tiedPlayers: [],
+        isRevote: false,
+        phase: 'reveal',
+      }
+
+      setUsedQuestionIds(prev => [...prev, drawn.entry.id])
+      setRound(newRound)
+      router.push('/reveal')
+    } else {
+      const drawn = drawWord(allSubcategories, cfg.selectedSubcategories, usedWordIds, cfg.customWords)
+      if (!drawn) return
+
+      const newRound: RoundState = {
+        word: drawn.entry.word,
+        pairedWord: cfg.imposterHint === 'pairedWord' ? drawn.entry.paired : undefined,
+        hint: cfg.imposterHint === 'hint' ? drawn.entry.hint : undefined,
+        subcategoryId: drawn.subcategoryId,
+        subcategoryName: drawn.subcategoryName,
+        imposters,
+        revealIndex: 0,
+        speakerIndex: 0,
+        votes: {},
+        tiedPlayers: [],
+        isRevote: false,
+        phase: 'reveal',
+      }
+
+      setUsedWordIds(prev => [...prev, drawn.entry.id])
+      setRound(newRound)
+      router.push('/reveal')
+    }
+  }, [config, usedWordIds, usedQuestionIds, router])
 
   const advanceReveal = useCallback(() => {
     if (!round || !config) return
@@ -169,10 +193,7 @@ export function Providers({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const advanceVote = useCallback(() => {
-    // Called after each player casts their vote to update voteIndex implicitly
-    // The vote page tracks its own local index; we just need to check if all done
-  }, [])
+  const advanceVote = useCallback(() => {}, [])
 
   const processVotes = useCallback(() => {
     if (!round || !config) return
@@ -182,7 +203,6 @@ export function Providers({ children }: { children: ReactNode }) {
     const tied = findTiedPlayers(tally, eligiblePlayers)
 
     if (tied.length > 1) {
-      // Another tie — start revote
       setRound(prev =>
         prev ? { ...prev, tiedPlayers: tied, isRevote: true, votes: {}, phase: 'vote' } : prev
       )
@@ -204,16 +224,22 @@ export function Providers({ children }: { children: ReactNode }) {
 
   const resetUsedWords = useCallback(() => {
     setUsedWordIds([])
+    setUsedQuestionIds([])
   }, [])
 
   const resetGame = useCallback(() => {
     setRound(null)
     setUsedWordIds([])
+    setUsedQuestionIds([])
   }, [])
 
-  // Derived: all words exhausted for selected categories
+  // Derived: pool exhausted
   const wordsExhausted = (() => {
     if (!config) return false
+    if (config.gameMode === 'question') {
+      const drawn = drawQuestion(allQuestionSubcategories, config.selectedSubcategories, usedQuestionIds)
+      return drawn === null
+    }
     const drawn = drawWord(allSubcategories, config.selectedSubcategories, usedWordIds, config.customWords)
     return drawn === null
   })()
@@ -225,6 +251,7 @@ export function Providers({ children }: { children: ReactNode }) {
           config,
           round,
           usedWordIds,
+          usedQuestionIds,
           wordsExhausted,
           setConfig,
           startRound,
