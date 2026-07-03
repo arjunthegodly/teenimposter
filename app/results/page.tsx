@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useGame } from '@/components/Providers'
@@ -12,9 +12,17 @@ import { ArrowRight, RotateCcw, Settings, Home } from 'lucide-react'
 export default function ResultsPage() {
   const router = useRouter()
   const { config, round, startRound, resetGame, wordsExhausted, sessionScores } = useGame()
+  const redirected = useRef(false)
 
   useEffect(() => {
-    if (!config || !round) router.replace('/')
+    if (redirected.current) return
+    const t = setTimeout(() => {
+      if (!config || !round) {
+        redirected.current = true
+        router.replace('/')
+      }
+    }, 120)
+    return () => clearTimeout(t)
   }, [config, round, router])
 
   if (!config || !round || round.phase !== 'results') return null
@@ -27,8 +35,10 @@ export default function ResultsPage() {
   const isChameleonMode = config.gameMode === 'chameleon'
   const civilianWord = round.word
   const imposterWord = round.pairedWord
-  const sortedTally = [...tally.entries()].sort(([, a], [, b]) => b - a)
-  const maxVotes = sortedTally[0]?.[1] ?? 1
+  const sortedTally = config.players
+    .map(p => [p, tally.get(p) ?? 0] as [string, number])
+    .sort(([, a], [, b]) => b - a)
+  const maxVotes = Math.max(sortedTally[0]?.[1] ?? 0, 1)
 
   // Chameleon escape: imposter was caught but guessed the word correctly
   const chameleonEscaped = isChameleonMode && votedOutIsImposter &&

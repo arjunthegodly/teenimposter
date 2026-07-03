@@ -17,8 +17,16 @@ export default function LastStandPage() {
   const [phase, setPhase] = useState<'pass' | 'defense' | 'done'>('pass')
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  const redirected = useRef(false)
   useEffect(() => {
-    if (!config || !round) router.replace('/')
+    if (redirected.current) return
+    const t = setTimeout(() => {
+      if (!config || !round) {
+        redirected.current = true
+        router.replace('/')
+      }
+    }, 120)
+    return () => clearTimeout(t)
   }, [config, round, router])
 
   useEffect(() => {

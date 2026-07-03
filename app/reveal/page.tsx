@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGame } from '@/components/Providers'
@@ -8,15 +8,25 @@ import { CardFlip } from '@/components/CardFlip'
 import { PassScreen } from '@/components/PassScreen'
 import { GameLayout } from '@/components/GameLayout'
 import { Eye, EyeOff, MessageSquare } from 'lucide-react'
+import { haptics } from '@/lib/haptics'
 
 export default function RevealPage() {
   const router = useRouter()
   const { config, round, advanceReveal } = useGame()
   const [showingPass, setShowingPass] = useState(true)
   const [flipped, setFlipped] = useState(false)
+  const [answer, setAnswer] = useState('')
+  const redirected = useRef(false)
 
   useEffect(() => {
-    if (!config || !round) router.replace('/')
+    if (redirected.current) return
+    const t = setTimeout(() => {
+      if (!config || !round) {
+        redirected.current = true
+        router.replace('/')
+      }
+    }, 120)
+    return () => clearTimeout(t)
   }, [config, round, router])
 
   if (!config || !round || round.phase !== 'reveal') return null
@@ -30,15 +40,24 @@ export default function RevealPage() {
   const handleReady = () => {
     setShowingPass(false)
     setFlipped(false)
+    setAnswer('')
   }
 
-  const handleFlipped = () => setFlipped(true)
+  const handleFlipped = () => {
+    haptics.flip()
+    setFlipped(true)
+  }
 
   const handleNext = () => {
+    haptics.tap()
     setShowingPass(true)
     setFlipped(false)
+    setAnswer('')
     advanceReveal()
   }
+
+  // Question mode: "Next" only enabled after writing an answer
+  const canProceedQuestion = !isQuestionMode || answer.trim().length > 0
 
   const frontContent = (
     <div className="flex flex-col items-center gap-4 text-center">
@@ -66,8 +85,7 @@ export default function RevealPage() {
     </div>
   )
 
-  // Question mode: everyone sees a question card — imposter's just has a different question
-  // The imposter has NO IDEA they are the imposter
+  // Question mode: show just the question in the card (clean, no height issues)
   const questionModeBack = (
     <div className="flex flex-col items-center gap-4 text-center w-full">
       <p
@@ -82,14 +100,9 @@ export default function RevealPage() {
       >
         {isImposter ? round.pairedWord : round.word}
       </div>
-      <div
-        className="w-full px-4 py-3 rounded-xl mt-1"
-        style={{ background: 'var(--card-border)' }}
-      >
-        <p className="text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
-          Remember your answer — don&apos;t reveal it yet. Share when it&apos;s your turn.
-        </p>
-      </div>
+      <p className="text-xs" style={{ color: 'var(--muted)' }}>
+        Think of your answer — write it below before passing
+      </p>
     </div>
   )
 
@@ -153,12 +166,12 @@ export default function RevealPage() {
     </div>
   )
 
-  // Chameleon mode: civilians see grid with real word glowing, imposter sees plain grid
+  // Chameleon mode: civilians see grid with secret word glowing, chameleon sees plain grid
   const chameleonModeBack = round.wordGrid ? (
     <div className="flex flex-col items-center gap-3 text-center w-full">
       <p
         className="text-xs uppercase tracking-widest font-semibold"
-        style={{ color: 'var(--muted)' }}
+        style={{ color: isImposter ? 'var(--secondary)' : 'var(--muted)' }}
       >
         {isImposter ? '🦎 You are the Chameleon' : round.subcategoryName}
       </p>
@@ -198,7 +211,11 @@ export default function RevealPage() {
     </div>
   ) : null
 
-  const backContent = isQuestionMode ? questionModeBack : isChameleonMode ? (chameleonModeBack ?? wordModeBack) : wordModeBack
+  const backContent = isQuestionMode
+    ? questionModeBack
+    : isChameleonMode
+    ? (chameleonModeBack ?? wordModeBack)
+    : wordModeBack
 
   return (
     <GameLayout>
@@ -229,7 +246,7 @@ export default function RevealPage() {
               className="text-xs px-2 py-0.5 rounded-full font-semibold"
               style={{ background: 'var(--primary)', color: '#fff' }}
             >
-              Question Mode
+              ❓ Question Mode
             </span>
           )}
           {isChameleonMode && (
@@ -264,7 +281,7 @@ export default function RevealPage() {
                 </p>
                 <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
                   {isQuestionMode
-                    ? 'Read your question — keep it secret until your turn'
+                    ? 'Read your question and write your answer below'
                     : isChameleonMode
                     ? 'Study the grid — cover the screen after'
                     : 'Cover the screen after reading'}
@@ -278,19 +295,48 @@ export default function RevealPage() {
               />
 
               {flipped && (
-                <motion.button
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  onClick={handleNext}
-                  className="w-full py-4 rounded-2xl font-bold text-lg font-heading flex items-center justify-center gap-2 transition-all active:scale-95 glow-primary"
-                  style={{
-                    background: isLastPlayer ? 'var(--secondary)' : 'var(--primary)',
-                    color: '#fff',
-                  }}
+                  className="flex flex-col gap-3"
                 >
-                  <EyeOff size={18} />
-                  {isLastPlayer ? 'Start Game →' : `Pass to ${config.players[round.revealIndex + 1]} →`}
-                </motion.button>
+                  {isQuestionMode && (
+                    <div className="flex flex-col gap-1.5">
+                      <label
+                        className="text-xs font-semibold uppercase tracking-widest"
+                        style={{ color: 'var(--muted)' }}
+                      >
+                        Your answer
+                      </label>
+                      <input
+                        type="text"
+                        value={answer}
+                        onChange={e => setAnswer(e.target.value)}
+                        placeholder="Write it here..."
+                        className="w-full px-4 py-3 rounded-xl text-base outline-none font-medium"
+                        style={{
+                          background: 'var(--card)',
+                          border: `1px solid ${answer.trim() ? 'var(--primary)' : 'var(--card-border)'}`,
+                          color: 'var(--foreground)',
+                        }}
+                        autoComplete="off"
+                        autoCapitalize="sentences"
+                      />
+                    </div>
+                  )}
+                  <button
+                    onClick={handleNext}
+                    disabled={!canProceedQuestion}
+                    className="w-full py-4 rounded-2xl font-bold text-lg font-heading flex items-center justify-center gap-2 transition-all active:scale-95 glow-primary disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{
+                      background: isLastPlayer ? 'var(--secondary)' : 'var(--primary)',
+                      color: '#fff',
+                    }}
+                  >
+                    <EyeOff size={18} />
+                    {isLastPlayer ? 'Start Game →' : `Pass to ${config.players[round.revealIndex + 1]} →`}
+                  </button>
+                </motion.div>
               )}
             </motion.div>
           )}

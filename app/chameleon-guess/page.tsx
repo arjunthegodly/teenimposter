@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useGame } from '@/components/Providers'
@@ -13,9 +13,17 @@ export default function ChameleonGuessPage() {
   const { config, round, submitChameleonGuess } = useGame()
   const [selected, setSelected] = useState<string | null>(null)
   const [phase, setPhase] = useState<'pass' | 'guess'>('pass')
+  const redirected = useRef(false)
 
   useEffect(() => {
-    if (!config || !round) router.replace('/')
+    if (redirected.current) return
+    const t = setTimeout(() => {
+      if (!config || !round) {
+        redirected.current = true
+        router.replace('/')
+      }
+    }, 120)
+    return () => clearTimeout(t)
   }, [config, round, router])
 
   if (!config || !round || !round.wordGrid) return null

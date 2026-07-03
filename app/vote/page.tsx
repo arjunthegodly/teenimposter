@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGame } from '@/components/Providers'
@@ -19,9 +19,17 @@ export default function VotePage() {
   const [localVotes, setLocalVotes] = useState<Record<string, string>>({})
   const [localTied, setLocalTied] = useState<string[]>([])
   const [isLocalRevote, setIsLocalRevote] = useState(false)
+  const redirected = useRef(false)
 
   useEffect(() => {
-    if (!config || !round) router.replace('/')
+    if (redirected.current) return
+    const t = setTimeout(() => {
+      if (!config || !round) {
+        redirected.current = true
+        router.replace('/')
+      }
+    }, 120)
+    return () => clearTimeout(t)
   }, [config, round, router])
 
   if (!config || !round) return null
@@ -61,9 +69,13 @@ export default function VotePage() {
   const handleReveal = () => proceedToResults(localVotes)
 
   const tally = tallyVotes(localVotes)
-  const sortedTally = [...tally.entries()].sort(([, a], [, b]) => b - a)
-  const votedOut = getVotedOut(tally, isLocalRevote ? localTied : config.players)
-  const maxVotes = sortedTally[0]?.[1] ?? 1
+  const eligibleVoters = isLocalRevote ? localTied : config.players
+  const allPlayerTally: [string, number][] = config.players
+    .map(p => [p, tally.get(p) ?? 0] as [string, number])
+    .sort(([, a], [, b]) => b - a)
+  const sortedTally = allPlayerTally
+  const votedOut = getVotedOut(tally, eligibleVoters)
+  const maxVotes = Math.max(sortedTally[0]?.[1] ?? 0, 1)
 
   if (showTally) {
     return (
@@ -81,7 +93,9 @@ export default function VotePage() {
               {votedOut
                 ? `${votedOut} is out`
                 : config.gameMode === 'question'
-                ? 'Everyone had the same question?'
+                ? 'Tied vote — no clear suspect'
+                : config.gameMode === 'chameleon'
+                ? 'No clear suspect — Chameleon wins!'
                 : 'Nobody caught — no clear winner'}
             </p>
           </div>
@@ -151,7 +165,11 @@ export default function VotePage() {
             className="w-full py-4 rounded-2xl font-bold text-lg font-heading glow-primary transition-all active:scale-95 flex items-center justify-center gap-2"
             style={{ background: 'var(--primary)', color: '#fff' }}
           >
-            {config.gameMode === 'question' ? 'Reveal Questions' : 'Reveal Imposter'}
+            {config.gameMode === 'question'
+              ? 'Reveal Questions'
+              : config.gameMode === 'chameleon'
+              ? 'Reveal Chameleon'
+              : 'Reveal Imposter'}
             <ArrowRight size={20} />
           </button>
         </motion.div>

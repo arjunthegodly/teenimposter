@@ -165,7 +165,7 @@ export default function Home() {
             ))}
           </div>
           <p className="text-xs" style={{ color: 'var(--muted)', opacity: 0.55 }}>
-            10 themes · 1,500+ prompts · 2 modes
+            10 themes · 1,500+ prompts · 3 modes
           </p>
         </motion.div>
       </motion.div>

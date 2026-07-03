@@ -45,8 +45,8 @@ const questionModeSteps = [
   },
   {
     emoji: '🎤',
-    title: 'Everyone answers',
-    body: "Take turns sharing your answer out loud. Civilians try to sound normal. The imposter answers honestly — but since their question was different, their answer might sound subtly off.",
+    title: 'Write, then share',
+    body: "After seeing the question, type your answer in the box before passing the phone. Then take turns reading your answers out loud. Civilians try to sound normal — the imposter answers honestly, but their different question means their answer might sound subtly off.",
   },
   {
     emoji: '🔍',

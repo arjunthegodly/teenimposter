@@ -48,7 +48,7 @@ interface GameContextType {
   wordsExhausted: boolean
   sessionScores: Record<string, number>
   setConfig: (config: GameConfig) => void
-  startRound: (overrideConfig?: GameConfig) => void
+  startRound: (overrideConfig?: GameConfig, freshUsedIds?: { wordIds?: string[]; questionIds?: string[] }) => void
   advanceReveal: () => void
   advanceSpeaker: () => void
   startVoting: () => void
@@ -110,14 +110,18 @@ export function Providers({ children }: { children: ReactNode }) {
     setConfigState(cfg)
   }, [])
 
-  const startRound = useCallback((overrideConfig?: GameConfig) => {
+  const startRound = useCallback((overrideConfig?: GameConfig, freshUsedIds?: { wordIds?: string[]; questionIds?: string[] }) => {
     const cfg = overrideConfig ?? config
     if (!cfg) return
+
+    // Use freshUsedIds when caller just reset the pool (state not committed yet)
+    const wordIds = freshUsedIds?.wordIds ?? usedWordIds
+    const questionIds = freshUsedIds?.questionIds ?? usedQuestionIds
 
     const imposters = assignImposters(cfg.players, cfg.imposterRange)
 
     if (cfg.gameMode === 'question') {
-      const drawn = drawQuestion(allQuestionSubcategories, cfg.selectedSubcategories, usedQuestionIds)
+      const drawn = drawQuestion(allQuestionSubcategories, cfg.selectedSubcategories, questionIds)
       if (!drawn) return
 
       const newRound: RoundState = {
@@ -139,7 +143,7 @@ export function Providers({ children }: { children: ReactNode }) {
       setRound(newRound)
       router.push('/reveal')
     } else if (cfg.gameMode === 'chameleon') {
-      const drawn = drawChameleonRound(allSubcategories, cfg.selectedSubcategories, usedWordIds)
+      const drawn = drawChameleonRound(allSubcategories, cfg.selectedSubcategories, wordIds)
       if (!drawn) return
 
       const newRound: RoundState = {
@@ -162,7 +166,7 @@ export function Providers({ children }: { children: ReactNode }) {
       setRound(newRound)
       router.push('/reveal')
     } else {
-      const drawn = drawWord(allSubcategories, cfg.selectedSubcategories, usedWordIds, cfg.customWords)
+      const drawn = drawWord(allSubcategories, cfg.selectedSubcategories, wordIds, cfg.customWords)
       if (!drawn) return
 
       const newRound: RoundState = {

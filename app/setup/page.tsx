@@ -11,7 +11,7 @@ import { GameLayout } from '@/components/GameLayout'
 import { categoryGroups, defaultSelectedSubcategories } from '@/data/categories/index'
 import { GameConfig, GameMode, ImposterHint } from '@/lib/types'
 
-const STEP_LABELS = ['Players', 'Mode', 'Categories', 'Modes', 'Timer']
+const STEP_LABELS = ['Players', 'Mode', 'Categories', 'Options', 'Timer']
 
 const HINT_OPTIONS: { value: ImposterHint; label: string; desc: string }[] = [
   { value: 'category', label: 'Category', desc: 'Imposter sees the category name' },
@@ -86,6 +86,9 @@ export default function SetupPage() {
   const clampMax = (v: number) => Math.max(imposterMin, Math.min(v, players.length || 99))
 
   const handleStart = () => {
+    // If the pool was exhausted, reset it — but the state update is batched and won't
+    // commit before startRound runs, so pass fresh empty arrays explicitly.
+    const freshUsedIds = wordsExhausted ? { wordIds: [], questionIds: [] } : undefined
     if (wordsExhausted) resetUsedWords()
 
     const cfg: GameConfig = {
@@ -93,14 +96,14 @@ export default function SetupPage() {
       gameMode,
       selectedSubcategories: selectedSubs,
       customWords,
-      imposterRange: [imposterMin, imposterMax],
+      imposterRange: gameMode === 'chameleon' ? [1, 1] : [imposterMin, imposterMax],
       imposterHint: (gameMode === 'question' || gameMode === 'chameleon') ? 'nothing' : imposterHint,
       speedRound: { enabled: speedEnabled, duration: speedDuration },
       timer: { enabled: timerEnabled, duration: timerDuration },
       lastStand,
     }
     setConfig(cfg)
-    startRound(cfg)
+    startRound(cfg, freshUsedIds)
   }
 
   return (
@@ -550,14 +553,29 @@ export default function SetupPage() {
           >
             <div>
               <h2 className="text-2xl font-bold font-heading" style={{ color: 'var(--foreground)' }}>
-                Game modes
+                Game options
               </h2>
               <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
                 Configure how you play
               </p>
             </div>
 
-            {/* Imposter range */}
+            {/* Imposter range — hidden for chameleon (always exactly 1) */}
+            {gameMode === 'chameleon' && (
+              <div className="card p-4 flex gap-3 items-center">
+                <span
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                  style={{ background: 'var(--card-border)' }}
+                >
+                  🦎
+                </span>
+                <div>
+                  <p className="font-bold text-sm font-heading" style={{ color: 'var(--foreground)' }}>Always 1 Chameleon</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>Chameleon Mode always has exactly one chameleon per round</p>
+                </div>
+              </div>
+            )}
+            {gameMode !== 'chameleon' && (
             <div className="card p-5 flex flex-col gap-4">
               <p className="font-bold font-heading text-sm" style={{ color: 'var(--foreground)' }}>
                 Number of imposters
@@ -617,6 +635,7 @@ export default function SetupPage() {
                 : `${imposterMin}–${imposterMax} imposters — chosen randomly each round${imposterMax === players.length && players.length > 0 ? ' (max = everyone!)' : ''}`}
               </p>
             </div>
+            )}
 
             {/* Imposter hint — word mode only */}
             {gameMode === 'word' && (
@@ -840,9 +859,13 @@ export default function SetupPage() {
                 <span style={{ color: 'var(--foreground)' }}>{selectedSubs.length} selected</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span style={{ color: 'var(--muted)' }}>Imposters</span>
+                <span style={{ color: 'var(--muted)' }}>{gameMode === 'chameleon' ? 'Chameleon' : 'Imposters'}</span>
                 <span style={{ color: 'var(--foreground)' }}>
-                  {imposterMin === imposterMax ? imposterMin : `${imposterMin}–${imposterMax}`} (random)
+                  {gameMode === 'chameleon'
+                    ? '1 (always)'
+                    : imposterMin === imposterMax
+                    ? `${imposterMin} (fixed)`
+                    : `${imposterMin}–${imposterMax} (random)`}
                 </span>
               </div>
               {gameMode === 'word' && (
@@ -857,6 +880,12 @@ export default function SetupPage() {
                 <div className="flex justify-between text-sm">
                   <span style={{ color: 'var(--muted)' }}>Speed round</span>
                   <span style={{ color: 'var(--secondary)' }}>⚡ {speedDuration}s per player</span>
+                </div>
+              )}
+              {timerEnabled && (
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: 'var(--muted)' }}>Round timer</span>
+                  <span style={{ color: 'var(--secondary)' }}>⏱ {timerDuration}s</span>
                 </div>
               )}
               {lastStand && (
