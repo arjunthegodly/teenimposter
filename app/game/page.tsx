@@ -136,15 +136,20 @@ export default function GamePage() {
           )}
         </AnimatePresence>
 
-        {/* Mode reminder */}
+        {/* Mode reminder — question mode shows the actual question */}
         {isQuestionMode && (
           <div
-            className="card px-4 py-3 flex gap-2 items-center"
+            className="card px-4 py-3 flex flex-col gap-1.5"
             style={{ borderColor: 'var(--primary)' }}
           >
-            <span style={{ color: 'var(--primary)', fontSize: '16px' }}>🕵️</span>
-            <p className="text-sm" style={{ color: 'var(--muted)' }}>
-              Someone answered a different question — find out who sounds off
+            <p className="text-xs uppercase tracking-widest font-semibold" style={{ color: 'var(--primary)' }}>
+              🕵️ The question
+            </p>
+            <p className="text-sm font-medium leading-snug" style={{ color: 'var(--foreground)' }}>
+              {round.word}
+            </p>
+            <p className="text-xs" style={{ color: 'var(--muted)' }}>
+              One player got a slightly different question — find out who sounds off
             </p>
           </div>
         )}
