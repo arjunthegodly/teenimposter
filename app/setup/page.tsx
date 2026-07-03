@@ -831,8 +831,8 @@ export default function SetupPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span style={{ color: 'var(--muted)' }}>Mode</span>
-                <span style={{ color: gameMode === 'question' ? 'var(--primary)' : 'var(--foreground)' }}>
-                  {gameMode === 'question' ? '🕵️ Question Mode' : '💬 Word Mode'}
+                <span style={{ color: gameMode !== 'word' ? 'var(--primary)' : 'var(--foreground)' }}>
+                  {gameMode === 'question' ? '🕵️ Question Mode' : gameMode === 'chameleon' ? '🦎 Chameleon Mode' : '💬 Word Mode'}
                 </span>
               </div>
               <div className="flex justify-between text-sm">

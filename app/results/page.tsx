@@ -266,7 +266,7 @@ export default function ResultsPage() {
               style={{ background: 'var(--card)', border: '1px solid var(--card-border)', color: 'var(--foreground)' }}
             >
               <RotateCcw size={16} />
-              {isQuestionMode ? 'All questions used — reshuffle' : 'All words used — reshuffle'}
+              {isQuestionMode ? 'All questions used — reshuffle' : 'All words used — reshuffle'}{/* chameleon uses word pool so same text works */}
             </button>
           ) : (
             <button
