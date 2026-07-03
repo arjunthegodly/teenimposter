@@ -34,7 +34,7 @@ export default function VotePage() {
 
   if (!config || !round) return null
 
-  const voters = isLocalRevote ? localTied : config.players
+  const voters = config.players  // all players vote even in tiebreaks
   const currentVoter = voters[localVoteIndex]
   const allVoted = localVoteIndex >= voters.length
 
