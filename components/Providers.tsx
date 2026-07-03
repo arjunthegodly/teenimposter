@@ -57,6 +57,7 @@ interface GameContextType {
   processVotes: () => void
   startRevote: (tiedPlayers: string[]) => void
   proceedToResults: (finalVotes: Record<string, string>) => void
+  submitAnswer: (player: string, answer: string) => void
   submitChameleonGuess: (guess: string) => void
   resetUsedWords: () => void
   resetGame: () => void
@@ -288,6 +289,10 @@ export function Providers({ children }: { children: ReactNode }) {
     }
   }, [round, config, router])
 
+  const submitAnswer = useCallback((player: string, answer: string) => {
+    setRound(prev => prev ? { ...prev, answers: { ...prev.answers, [player]: answer } } : prev)
+  }, [])
+
   const submitChameleonGuess = useCallback((guess: string) => {
     if (!round || !config) return
     const escaped = guess === round.word
@@ -339,6 +344,7 @@ export function Providers({ children }: { children: ReactNode }) {
           sessionScores,
           setConfig,
           startRound,
+          submitAnswer,
           advanceReveal,
           advanceSpeaker,
           startVoting,

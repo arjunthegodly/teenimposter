@@ -62,6 +62,7 @@ export interface RoundState {
   phase: 'reveal' | 'clue' | 'vote' | 'tally' | 'results'
   wordGrid?: string[]
   chameleonGuess?: string
+  answers?: Record<string, string>
 }
 
 export interface GameState {

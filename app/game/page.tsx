@@ -196,29 +196,30 @@ export default function GamePage() {
           </div>
         )}
 
-        {/* Player order list */}
+        {/* Player order list — with answers for question mode */}
         <div className="card overflow-hidden">
           <div className="px-4 pt-4 pb-2">
             <p className="text-xs uppercase tracking-widest font-semibold" style={{ color: 'var(--muted)' }}>
-              {isQuestionMode ? 'Answer order' : isChameleonMode ? 'Clue order' : 'Player order'}
+              {isQuestionMode ? 'Answers' : isChameleonMode ? 'Clue order' : 'Player order'}
             </p>
           </div>
           <div className="flex flex-col px-2 pb-2">
             {config.players.map((player, i) => {
               const isActive = isSpeedRound && i === round.speakerIndex
               const isDone = isSpeedRound && i < round.speakerIndex
+              const playerAnswer = round.answers?.[player]
 
               return (
                 <motion.div
                   key={player}
                   layout
-                  className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all"
+                  className="flex items-start gap-3 px-3 py-3 rounded-xl transition-all"
                   style={{
                     background: isActive ? 'var(--primary)' : 'transparent',
                   }}
                 >
                   <span
-                    className="text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold flex-shrink-0"
+                    className="text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold flex-shrink-0 mt-0.5"
                     style={{
                       background: isActive
                         ? 'rgba(255,255,255,0.2)'
@@ -231,15 +232,25 @@ export default function GamePage() {
                   >
                     {isDone ? '✓' : i + 1}
                   </span>
-                  <span
-                    className="font-semibold flex-1"
-                    style={{ color: isActive ? '#fff' : 'var(--foreground)' }}
-                  >
-                    {player}
-                  </span>
-                  {isActive && (
+                  <div className="flex-1 min-w-0">
                     <span
-                      className="text-xs font-medium px-2 py-0.5 rounded-full"
+                      className="font-semibold text-sm"
+                      style={{ color: isActive ? '#fff' : 'var(--foreground)' }}
+                    >
+                      {player}
+                    </span>
+                    {isQuestionMode && playerAnswer && (
+                      <p
+                        className="text-sm mt-0.5 leading-snug"
+                        style={{ color: isActive ? 'rgba(255,255,255,0.8)' : 'var(--muted)' }}
+                      >
+                        {playerAnswer}
+                      </p>
+                    )}
+                  </div>
+                  {isActive && !isQuestionMode && (
+                    <span
+                      className="text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0"
                       style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}
                     >
                       speaking

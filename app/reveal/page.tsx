@@ -12,7 +12,7 @@ import { haptics } from '@/lib/haptics'
 
 export default function RevealPage() {
   const router = useRouter()
-  const { config, round, advanceReveal } = useGame()
+  const { config, round, advanceReveal, submitAnswer } = useGame()
   const [showingPass, setShowingPass] = useState(true)
   const [flipped, setFlipped] = useState(false)
   const [answer, setAnswer] = useState('')
@@ -50,6 +50,9 @@ export default function RevealPage() {
 
   const handleNext = () => {
     haptics.tap()
+    if (isQuestionMode && answer.trim()) {
+      submitAnswer(currentPlayer, answer.trim())
+    }
     setShowingPass(true)
     setFlipped(false)
     setAnswer('')
