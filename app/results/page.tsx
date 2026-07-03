@@ -24,26 +24,38 @@ export default function ResultsPage() {
   const votedOutIsImposter = votedOut ? round.imposters.includes(votedOut) : false
   const allImposters = round.imposters.length === config.players.length
   const isQuestionMode = config.gameMode === 'question'
+  const isChameleonMode = config.gameMode === 'chameleon'
   const civilianWord = round.word
   const imposterWord = round.pairedWord
   const sortedTally = [...tally.entries()].sort(([, a], [, b]) => b - a)
   const maxVotes = sortedTally[0]?.[1] ?? 1
 
+  // Chameleon escape: imposter was caught but guessed the word correctly
+  const chameleonEscaped = isChameleonMode && votedOutIsImposter &&
+    round.chameleonGuess === round.word
+
   const outcomeLabel = allImposters
     ? '🤯 All Imposters'
+    : chameleonEscaped
+    ? '🦎 Chameleon Escapes!'
     : votedOutIsImposter
     ? '🎉 Civilians Win'
+    : isChameleonMode
+    ? '🦎 Chameleon Wins'
     : '😈 Imposter Wins'
 
+  const imposterNoun = isChameleonMode ? 'Chameleon' : 'imposter'
   const imposterLabel = allImposters
     ? 'Every player was an imposter'
+    : chameleonEscaped
+    ? `${round.imposters[0]} escaped by guessing the word!`
     : round.imposters.length === 1
-    ? `${round.imposters[0]} was the imposter`
-    : `${round.imposters.join(' & ')} were the imposters`
+    ? `${round.imposters[0]} was the ${imposterNoun}`
+    : `${round.imposters.join(' & ')} were the ${imposterNoun}s`
 
   return (
     <GameLayout>
-      <Confetti trigger={true} />
+      <Confetti trigger={true} win={votedOutIsImposter || allImposters || chameleonEscaped} />
 
       <div className="flex flex-col gap-5 pb-4">
 
@@ -89,6 +101,8 @@ export default function ResultsPage() {
             >
               {isQuestionMode
                 ? 'Civilian question'
+                : isChameleonMode
+                ? 'Secret word'
                 : allImposters
                 ? 'The word nobody knew'
                 : 'Civilians had'}
@@ -121,6 +135,26 @@ export default function ResultsPage() {
               >
                 {imposterWord}
               </p>
+            </div>
+          )}
+
+          {isChameleonMode && round.chameleonGuess && (
+            <div
+              className="pt-4"
+              style={{ borderTop: '1px solid var(--card-border)' }}
+            >
+              <p
+                className="text-xs uppercase tracking-widest font-semibold mb-1.5"
+                style={{ color: 'var(--muted)' }}
+              >
+                Chameleon guessed
+              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-2xl font-extrabold font-heading" style={{ color: chameleonEscaped ? 'var(--secondary)' : 'var(--primary)' }}>
+                  {round.chameleonGuess}
+                </p>
+                <span className="text-lg">{chameleonEscaped ? '✅' : '❌'}</span>
+              </div>
             </div>
           )}
         </motion.div>

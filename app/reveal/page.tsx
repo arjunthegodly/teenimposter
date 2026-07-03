@@ -22,6 +22,7 @@ export default function RevealPage() {
   if (!config || !round || round.phase !== 'reveal') return null
 
   const isQuestionMode = config.gameMode === 'question'
+  const isChameleonMode = config.gameMode === 'chameleon'
   const currentPlayer = config.players[round.revealIndex]
   const isImposter = round.imposters.includes(currentPlayer)
   const isLastPlayer = round.revealIndex === config.players.length - 1
@@ -49,6 +50,8 @@ export default function RevealPage() {
       >
         {isQuestionMode
           ? <MessageSquare size={30} style={{ color: 'var(--primary)' }} />
+          : isChameleonMode
+          ? <span style={{ fontSize: 28 }}>🦎</span>
           : <Eye size={30} style={{ color: 'var(--primary)' }} />
         }
       </motion.div>
@@ -150,7 +153,52 @@ export default function RevealPage() {
     </div>
   )
 
-  const backContent = isQuestionMode ? questionModeBack : wordModeBack
+  // Chameleon mode: civilians see grid with real word glowing, imposter sees plain grid
+  const chameleonModeBack = round.wordGrid ? (
+    <div className="flex flex-col items-center gap-3 text-center w-full">
+      <p
+        className="text-xs uppercase tracking-widest font-semibold"
+        style={{ color: 'var(--muted)' }}
+      >
+        {isImposter ? '🦎 You are the Chameleon' : round.subcategoryName}
+      </p>
+      {isImposter && (
+        <p className="text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
+          Blend in. Listen to clues and guess the secret word before you get caught.
+        </p>
+      )}
+      <div className="grid grid-cols-4 gap-1.5 w-full">
+        {round.wordGrid.map(word => {
+          const isSecret = !isImposter && word === round.word
+          return (
+            <div
+              key={word}
+              className="py-2 px-1 rounded-lg text-center font-bold leading-tight"
+              style={{
+                background: isSecret ? 'var(--primary)' : 'var(--card-border)',
+                color: isSecret ? '#fff' : 'var(--foreground)',
+                fontSize: '9px',
+                boxShadow: isSecret ? `0 0 12px color-mix(in srgb, var(--primary) 60%, transparent)` : 'none',
+                minHeight: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {word}
+            </div>
+          )
+        })}
+      </div>
+      {!isImposter && (
+        <p className="text-xs" style={{ color: 'var(--muted)' }}>
+          Give a clue without saying the highlighted word
+        </p>
+      )}
+    </div>
+  ) : null
+
+  const backContent = isQuestionMode ? questionModeBack : isChameleonMode ? (chameleonModeBack ?? wordModeBack) : wordModeBack
 
   return (
     <GameLayout>
@@ -184,6 +232,14 @@ export default function RevealPage() {
               Question Mode
             </span>
           )}
+          {isChameleonMode && (
+            <span
+              className="text-xs px-2 py-0.5 rounded-full font-semibold"
+              style={{ background: 'var(--secondary)', color: '#fff' }}
+            >
+              🦎 Chameleon
+            </span>
+          )}
         </div>
 
         <AnimatePresence mode="wait">
@@ -209,6 +265,8 @@ export default function RevealPage() {
                 <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
                   {isQuestionMode
                     ? 'Read your question — keep it secret until your turn'
+                    : isChameleonMode
+                    ? 'Study the grid — cover the screen after'
                     : 'Cover the screen after reading'}
                 </p>
               </div>

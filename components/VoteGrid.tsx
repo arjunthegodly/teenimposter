@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { haptics } from '@/lib/haptics'
 
 interface VoteGridProps {
   players: string[]
   voter: string
   onVote: (votedFor: string) => void
-  gameMode?: 'word' | 'question'
+  gameMode?: 'word' | 'question' | 'chameleon'
 }
 
 export function VoteGrid({ players, voter, onVote, gameMode = 'word' }: VoteGridProps) {
@@ -15,7 +16,7 @@ export function VoteGrid({ players, voter, onVote, gameMode = 'word' }: VoteGrid
   const eligible = players.filter(p => p !== voter)
 
   const confirm = () => {
-    if (selected) onVote(selected)
+    if (selected) { haptics.confirm(); onVote(selected) }
   }
 
   return (
@@ -28,6 +29,8 @@ export function VoteGrid({ players, voter, onVote, gameMode = 'word' }: VoteGrid
         <p className="text-sm mt-2" style={{ color: 'var(--muted)' }}>
           {gameMode === 'question'
             ? "Who had a different question?"
+            : gameMode === 'chameleon'
+            ? "Who is the Chameleon?"
             : "Who's the imposter?"}
         </p>
       </div>
@@ -36,7 +39,7 @@ export function VoteGrid({ players, voter, onVote, gameMode = 'word' }: VoteGrid
         {eligible.map(p => (
           <motion.button
             key={p}
-            onClick={() => setSelected(p)}
+            onClick={() => { haptics.tap(); setSelected(p) }}
             whileTap={{ scale: 0.95 }}
             className="py-4 px-3 rounded-2xl text-center font-bold text-lg font-heading transition-all"
             style={{

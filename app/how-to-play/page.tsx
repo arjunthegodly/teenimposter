@@ -57,6 +57,14 @@ const questionModeSteps = [
 
 const modes = [
   {
+    name: '🦎 Chameleon Mode',
+    desc: "Everyone sees a 4×4 word grid. Civilians know which word is the secret — the Chameleon doesn't. Give a clue without saying the secret word. If caught, the Chameleon gets one final guess to escape!",
+  },
+  {
+    name: '⚖️ Last Stand',
+    desc: "When enabled, the voted-out player gets 10 seconds to defend themselves before the reveal. Makes every round more dramatic.",
+  },
+  {
     name: '🔄 Paired Word',
     desc: "In Word Mode, the imposter gets a similar-but-wrong word (e.g. civilians have \"Minecraft\", imposter has \"Roblox\"). Even harder to catch!",
   },

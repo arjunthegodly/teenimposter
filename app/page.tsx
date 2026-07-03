@@ -9,8 +9,8 @@ import { themes } from '@/lib/theme-config'
 const FEATURE_PILLS = [
   { label: '😈 Word Mode', desc: 'Give clues. Catch the imposter.' },
   { label: '❓ Question Mode', desc: 'Blind imposter. Social chaos.' },
-  { label: '⚡ Speed Round', desc: 'Timer per player.' },
-  { label: '👥 Multi-Imposter', desc: 'How many are hiding?' },
+  { label: '🦎 Chameleon', desc: 'Grid-based bluffing.' },
+  { label: '⚖️ Last Stand', desc: '10 seconds to plead your case.' },
 ]
 
 export default function Home() {

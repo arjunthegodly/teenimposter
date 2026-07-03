@@ -79,6 +79,52 @@ export function drawQuestion(
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
+interface DrawnChameleon {
+  entry: WordEntry
+  subcategoryId: string
+  subcategoryName: string
+  wordGrid: string[]
+}
+
+const GRID_SIZE = 16
+
+export function drawChameleonRound(
+  subcategories: SubCategoryData[],
+  selectedIds: string[],
+  usedWordIds: string[]
+): DrawnChameleon | null {
+  const pool: DrawnWord[] = []
+  const allWordStrings: string[] = []
+
+  for (const sub of subcategories) {
+    if (!selectedIds.includes(sub.id)) continue
+    for (const word of sub.words) {
+      allWordStrings.push(word.word)
+      if (!usedWordIds.includes(word.id)) {
+        pool.push({ entry: word, subcategoryId: sub.id, subcategoryName: sub.name })
+      }
+    }
+  }
+
+  if (pool.length === 0) return null
+
+  const drawn = pool[Math.floor(Math.random() * pool.length)]
+  const secretWord = drawn.entry.word
+
+  const decoyPool = allWordStrings.filter(w => w !== secretWord)
+  const shuffledDecoys = decoyPool.sort(() => Math.random() - 0.5)
+  const decoys = shuffledDecoys.slice(0, GRID_SIZE - 1)
+
+  const grid = [...decoys, secretWord].sort(() => Math.random() - 0.5)
+
+  return {
+    entry: drawn.entry,
+    subcategoryId: drawn.subcategoryId,
+    subcategoryName: drawn.subcategoryName,
+    wordGrid: grid,
+  }
+}
+
 export function tallyVotes(votes: Record<string, string>): Map<string, number> {
   const tally = new Map<string, number>()
   for (const votedFor of Object.values(votes)) {

@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { haptics } from '@/lib/haptics'
 
 interface PassScreenProps {
   name: string
@@ -50,7 +51,7 @@ export function PassScreen({ name, onReady, label = 'Tap when ready' }: PassScre
       <div className="w-12 h-px" style={{ background: 'var(--card-border)' }} />
 
       <button
-        onClick={onReady}
+        onClick={() => { haptics.tap(); onReady() }}
         className="px-10 py-4 rounded-2xl text-lg font-bold font-heading glow-primary transition-transform active:scale-95"
         style={{ background: 'var(--primary)', color: '#fff' }}
       >

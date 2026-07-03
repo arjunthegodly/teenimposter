@@ -11,7 +11,7 @@ import {
 } from 'react'
 import { useRouter } from 'next/navigation'
 import { GameConfig, GameState, ImposterHint, RoundState, ThemeId } from '@/lib/types'
-import { assignImposters, drawWord, drawQuestion, findTiedPlayers, getVotedOut, tallyVotes } from '@/lib/game-logic'
+import { assignImposters, drawWord, drawQuestion, drawChameleonRound, findTiedPlayers, getVotedOut, tallyVotes } from '@/lib/game-logic'
 import { SOUND_KEY, THEME_KEY, defaultTheme } from '@/lib/theme-config'
 import { allSubcategories } from '@/data/categories/index'
 import { allQuestionSubcategories } from '@/data/questions/index'
@@ -57,6 +57,7 @@ interface GameContextType {
   processVotes: () => void
   startRevote: (tiedPlayers: string[]) => void
   proceedToResults: (finalVotes: Record<string, string>) => void
+  submitChameleonGuess: (guess: string) => void
   resetUsedWords: () => void
   resetGame: () => void
 }
@@ -135,6 +136,29 @@ export function Providers({ children }: { children: ReactNode }) {
       }
 
       setUsedQuestionIds(prev => [...prev, drawn.entry.id])
+      setRound(newRound)
+      router.push('/reveal')
+    } else if (cfg.gameMode === 'chameleon') {
+      const drawn = drawChameleonRound(allSubcategories, cfg.selectedSubcategories, usedWordIds)
+      if (!drawn) return
+
+      const newRound: RoundState = {
+        word: drawn.entry.word,
+        pairedWord: undefined,
+        hint: undefined,
+        subcategoryId: drawn.subcategoryId,
+        subcategoryName: drawn.subcategoryName,
+        imposters,
+        revealIndex: 0,
+        speakerIndex: 0,
+        votes: {},
+        tiedPlayers: [],
+        isRevote: false,
+        phase: 'reveal',
+        wordGrid: drawn.wordGrid,
+      }
+
+      setUsedWordIds(prev => [...prev, drawn.entry.id])
       setRound(newRound)
       router.push('/reveal')
     } else {
@@ -230,27 +254,52 @@ export function Providers({ children }: { children: ReactNode }) {
     const votedOutIsImposter = votedOut ? round.imposters.includes(votedOut) : false
     const allImposters = round.imposters.length === config.players.length
 
-    setSessionScores(prev => {
-      const next = { ...prev }
-      if (allImposters) {
-        config.players.forEach(p => { next[p] = (next[p] ?? 0) + 1 })
-      } else if (votedOutIsImposter) {
-        config.players.forEach(p => {
-          if (!round.imposters.includes(p)) next[p] = (next[p] ?? 0) + 1
-        })
-      } else {
-        round.imposters.forEach(p => { next[p] = (next[p] ?? 0) + 1 })
-      }
-      return next
-    })
+    const isChameleonCatch = config.gameMode === 'chameleon' && votedOut && votedOutIsImposter
+
+    if (!isChameleonCatch) {
+      // Score immediately — chameleon catch defers until guess outcome
+      setSessionScores(prev => {
+        const next = { ...prev }
+        if (allImposters) {
+          config.players.forEach(p => { next[p] = (next[p] ?? 0) + 1 })
+        } else if (votedOutIsImposter) {
+          config.players.forEach(p => {
+            if (!round.imposters.includes(p)) next[p] = (next[p] ?? 0) + 1
+          })
+        } else {
+          round.imposters.forEach(p => { next[p] = (next[p] ?? 0) + 1 })
+        }
+        return next
+      })
+    }
 
     setRound(prev => prev ? { ...prev, phase: 'results', votes: finalVotes } : prev)
 
-    if (config.lastStand && votedOut) {
+    if (isChameleonCatch) {
+      router.push('/chameleon-guess')
+    } else if (config.lastStand && votedOut) {
       router.push('/last-stand')
     } else {
       router.push('/results')
     }
+  }, [round, config, router])
+
+  const submitChameleonGuess = useCallback((guess: string) => {
+    if (!round || !config) return
+    const escaped = guess === round.word
+    setSessionScores(prev => {
+      const next = { ...prev }
+      if (escaped) {
+        round.imposters.forEach(p => { next[p] = (next[p] ?? 0) + 1 })
+      } else {
+        config.players.forEach(p => {
+          if (!round.imposters.includes(p)) next[p] = (next[p] ?? 0) + 1
+        })
+      }
+      return next
+    })
+    setRound(prev => prev ? { ...prev, chameleonGuess: guess } : prev)
+    router.push('/results')
   }, [round, config, router])
 
   const resetUsedWords = useCallback(() => {
@@ -294,6 +343,7 @@ export function Providers({ children }: { children: ReactNode }) {
           processVotes,
           startRevote,
           proceedToResults,
+          submitChameleonGuess,
           resetUsedWords,
           resetGame,
         }}

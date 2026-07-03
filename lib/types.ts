@@ -1,6 +1,6 @@
 export type ThemeId = 'dark-neon' | 'gradient-glass' | 'bold-bright' | 'retro-y2k' | 'sunset-vibe' | 'ocean-deep' | 'candy-pop' | 'rose-gold' | 'dark-academia' | 'cyber-pulse'
 export type ImposterHint = 'category' | 'pairedWord' | 'hint' | 'nothing'
-export type GameMode = 'word' | 'question'
+export type GameMode = 'word' | 'question' | 'chameleon'
 
 export interface WordEntry {
   id: string
@@ -60,6 +60,8 @@ export interface RoundState {
   tiedPlayers: string[]
   isRevote: boolean
   phase: 'reveal' | 'clue' | 'vote' | 'tally' | 'results'
+  wordGrid?: string[]
+  chameleonGuess?: string
 }
 
 export interface GameState {

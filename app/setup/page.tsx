@@ -94,7 +94,7 @@ export default function SetupPage() {
       selectedSubcategories: selectedSubs,
       customWords,
       imposterRange: [imposterMin, imposterMax],
-      imposterHint: gameMode === 'question' ? 'pairedWord' : imposterHint,
+      imposterHint: (gameMode === 'question' || gameMode === 'chameleon') ? 'nothing' : imposterHint,
       speedRound: { enabled: speedEnabled, duration: speedDuration },
       timer: { enabled: timerEnabled, duration: timerDuration },
       lastStand,
@@ -340,6 +340,60 @@ export default function SetupPage() {
                   </div>
                 </div>
               </button>
+
+              {/* Chameleon Mode */}
+              <button
+                onClick={() => setGameMode('chameleon')}
+                className="card p-5 text-left transition-all active:scale-[0.99]"
+                style={{
+                  borderColor: gameMode === 'chameleon' ? 'var(--secondary)' : 'var(--card-border)',
+                  borderWidth: '2px',
+                }}
+              >
+                <div className="flex items-start gap-4">
+                  <div
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
+                    style={{ background: gameMode === 'chameleon' ? 'var(--secondary)' : 'var(--card-border)' }}
+                  >
+                    🦎
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold font-heading text-base" style={{ color: 'var(--foreground)' }}>
+                        Chameleon
+                      </p>
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                        style={{ background: 'var(--secondary)', color: '#fff' }}
+                      >
+                        New
+                      </span>
+                    </div>
+                    <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--muted)' }}>
+                      Everyone sees a 4×4 word grid. Civilians know the secret word. The Chameleon doesn&apos;t — and must bluff. If caught, they get one last chance to guess it.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {['Grid-based', 'Bluffing', 'Last-chance guess'].map(tag => (
+                        <span
+                          key={tag}
+                          className="text-xs px-2 py-0.5 rounded-full"
+                          style={{ background: 'var(--card-border)', color: 'var(--muted)' }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div
+                    className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ borderColor: gameMode === 'chameleon' ? 'var(--secondary)' : 'var(--card-border)' }}
+                  >
+                    {gameMode === 'chameleon' && (
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--secondary)' }} />
+                    )}
+                  </div>
+                </div>
+              </button>
             </div>
 
             {gameMode === 'question' && (
@@ -352,6 +406,19 @@ export default function SetupPage() {
                 <span className="text-lg mt-0.5">💡</span>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
                   The imposter gets a slightly different question about the same topic. They answer it honestly — but their answer sounds subtly off to everyone else.
+                </p>
+              </motion.div>
+            )}
+            {gameMode === 'chameleon' && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="card px-4 py-3 flex gap-3 items-start"
+                style={{ borderColor: 'var(--secondary)' }}
+              >
+                <span className="text-lg mt-0.5">🦎</span>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
+                  If the Chameleon gets voted out, they get one chance to escape: guess the secret word from the grid. Guess correctly and they win — even after being caught!
                 </p>
               </motion.div>
             )}
@@ -590,6 +657,21 @@ export default function SetupPage() {
                   </p>
                   <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
                     In Question Mode, the imposter doesn&apos;t know they&apos;re the imposter. They get a different question and think everyone answered the same one.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Chameleon mode info */}
+            {gameMode === 'chameleon' && (
+              <div className="card p-4 flex gap-3 items-start" style={{ borderColor: 'var(--secondary)' }}>
+                <span className="text-lg">🦎</span>
+                <div>
+                  <p className="font-bold text-sm font-heading" style={{ color: 'var(--foreground)' }}>
+                    Grid-based bluffing
+                  </p>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
+                    Everyone sees a 4×4 grid. Civilians know which word is secret — the Chameleon doesn&apos;t. Give clues from the grid without revealing the secret word.
                   </p>
                 </div>
               </div>

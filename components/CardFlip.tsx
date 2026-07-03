@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { haptics } from '@/lib/haptics'
 
 interface CardFlipProps {
   front: React.ReactNode
@@ -14,6 +15,7 @@ export function CardFlip({ front, back, onFlip }: CardFlipProps) {
 
   const handleFlip = () => {
     if (flipped) return
+    haptics.flip()
     setFlipped(true)
     onFlip?.()
   }

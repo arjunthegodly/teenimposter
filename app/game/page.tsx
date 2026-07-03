@@ -20,6 +20,7 @@ export default function GamePage() {
   if (!config || !round || round.phase !== 'clue') return null
 
   const isQuestionMode = config.gameMode === 'question'
+  const isChameleonMode = config.gameMode === 'chameleon'
   const isSpeedRound = config.speedRound.enabled
   const speedDuration = config.speedRound.duration
   const hasOverallTimer = config.timer.enabled
@@ -40,13 +41,15 @@ export default function GamePage() {
               className="text-3xl font-extrabold font-heading"
               style={{ color: 'var(--foreground)' }}
             >
-              {isQuestionMode ? 'Share your answers' : 'Give your clues'}
+              {isQuestionMode ? 'Share your answers' : isChameleonMode ? 'Give clues from the grid' : 'Give your clues'}
             </h1>
             <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
               {isSpeedRound
                 ? `⚡ Speed round — ${speedDuration}s per player`
                 : isQuestionMode
                 ? 'Take turns sharing your answer — try to sound like everyone else'
+                : isChameleonMode
+                ? 'Give a clue from the grid — Chameleon is bluffing without knowing the word'
                 : 'One clue each, no repeating what others said'}
             </p>
           </div>
@@ -125,7 +128,7 @@ export default function GamePage() {
           )}
         </AnimatePresence>
 
-        {/* Question mode reminder */}
+        {/* Mode reminder */}
         {isQuestionMode && (
           <div
             className="card px-4 py-3 flex gap-2 items-center"
@@ -134,6 +137,17 @@ export default function GamePage() {
             <span style={{ color: 'var(--primary)', fontSize: '16px' }}>🕵️</span>
             <p className="text-sm" style={{ color: 'var(--muted)' }}>
               Someone answered a different question — find out who sounds off
+            </p>
+          </div>
+        )}
+        {isChameleonMode && (
+          <div
+            className="card px-4 py-3 flex gap-2 items-center"
+            style={{ borderColor: 'var(--secondary)' }}
+          >
+            <span style={{ fontSize: '16px' }}>🦎</span>
+            <p className="text-sm" style={{ color: 'var(--muted)' }}>
+              One player has the same grid but doesn&apos;t know the secret word
             </p>
           </div>
         )}
@@ -178,7 +192,7 @@ export default function GamePage() {
         <div className="card overflow-hidden">
           <div className="px-4 pt-4 pb-2">
             <p className="text-xs uppercase tracking-widest font-semibold" style={{ color: 'var(--muted)' }}>
-              {isQuestionMode ? 'Answer order' : 'Player order'}
+              {isQuestionMode ? 'Answer order' : isChameleonMode ? 'Clue order' : 'Player order'}
             </p>
           </div>
           <div className="flex flex-col px-2 pb-2">
