@@ -17,6 +17,7 @@ import {
 import './globals.css'
 import { Providers } from '@/components/Providers'
 import { ThemePicker } from '@/components/ThemePicker'
+import { Analytics } from '@vercel/analytics/next'
 
 const geist = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const spaceGrotesk = Space_Grotesk({ variable: '--font-space-grotesk', subsets: ['latin'] })
@@ -87,6 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemePicker />
           {children}
         </Providers>
+        <Analytics />
       </body>
     </html>
   )
